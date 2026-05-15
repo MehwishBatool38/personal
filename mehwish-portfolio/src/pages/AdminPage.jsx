@@ -139,11 +139,11 @@ export default function AdminPage({ onBack }) {
       getProjects("app"),
     ]);
     setProfile(prof || {
-      name: "Ali Hassan", tagline: "Building modern web & app experiences",
+      name: "Mehwish Batool", tagline: "Building modern web & app experiences",
       bio: "Software Engineering student at COMSATS University Islamabad, Vehari Campus.",
       university: "COMSATS University, Vehari", location: "Vehari, Pakistan",
-      email: "raoali.edu@gmail.com", linkedin: "https://www.linkedin.com/in/ali-hassan-45b9b53b0",
-      github: "https://github.com/Ali-Hassan-edu", available: true, years_exp: 2, projects_count: 14,
+      email: "mehwishkhan2438@gmail.com", linkedin: "https://www.linkedin.com/in/mehwish-batool-77029837b",
+      github: "https://github.com/mehwish-batool", available: true, years_exp: 2, projects_count: 14,
     });
     setWebProjects(web);
     setAppProjects(app);
@@ -604,37 +604,35 @@ function ProjectsTab({ webProjects, appProjects, setWebProjects, setAppProjects,
             
             {form.type === "web" && <ImageUploadField label="Image URL" value={form.image_url} onChange={(v) => setForm({ ...form, image_url: v })} />}
             
-            {form.type === "app" && (
-              <div>
-                <label className="admin-label">Screenshot URLs (gallery)</label>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <input value={screenshotInput} onChange={(e) => setScreenshotInput(e.target.value)} placeholder="https://…" onKeyDown={(e) => e.key === "Enter" && addScreenshot()} style={{ flex: 1 }} />
-                  <label className="btn-secondary" style={{ padding: "8px 14px", fontSize: 12, cursor: "pointer", display:"flex", alignItems:"center", whiteSpace:"nowrap" }}>
-                    Upload File
-                    <input type="file" accept="image/*" onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if(!file) return;
-                      try { const url = await uploadImage(file); setForm(f => ({...f, screenshots: [...(f.screenshots||[]), url]})); }
-                      catch(err) { alert(err.message); }
-                    }} style={{ display: "none" }} />
-                  </label>
-                  <button onClick={addScreenshot} className="btn-secondary" style={{ padding: "8px 14px", fontSize: 12, whiteSpace: "nowrap" }}>Add URL</button>
-                </div>
-                {(form.screenshots || []).length > 0 && (
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
-                    {(form.screenshots || []).map((s, i) => (
-                      <div key={i} style={{ position: "relative" }}>
-                        <img src={s} alt="" style={{ width: 52, height: 78, objectFit: "cover", borderRadius: 8, border: "1px solid rgba(255,255,255,0.12)" }} />
-                        <button
-                          onClick={() => removeScreenshot(i)}
-                          style={{ position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: "50%", background: "#0ea5e9", border: "none", color: "var(--ink)", fontSize: 11, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
-                        >×</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+            <div>
+              <label className="admin-label">Project Gallery (Screenshots/Pictures)</label>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input value={screenshotInput} onChange={(e) => setScreenshotInput(e.target.value)} placeholder="https://…" onKeyDown={(e) => e.key === "Enter" && addScreenshot()} style={{ flex: 1 }} />
+                <label className="btn-secondary" style={{ padding: "8px 14px", fontSize: 12, cursor: "pointer", display:"flex", alignItems:"center", whiteSpace:"nowrap" }}>
+                  Upload File
+                  <input type="file" accept="image/*" onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if(!file) return;
+                    try { const url = await uploadImage(file); setForm(f => ({...f, screenshots: [...(f.screenshots||[]), url]})); }
+                    catch(err) { alert(err.message); }
+                  }} style={{ display: "none" }} />
+                </label>
+                <button onClick={addScreenshot} className="btn-secondary" style={{ padding: "8px 14px", fontSize: 12, whiteSpace: "nowrap" }}>Add URL</button>
               </div>
-            )}
+              {(form.screenshots || []).length > 0 && (
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
+                  {(form.screenshots || []).map((s, i) => (
+                    <div key={i} style={{ position: "relative" }}>
+                      <img src={s} alt="" style={{ width: 52, height: 78, objectFit: "cover", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)" }} />
+                      <button
+                        onClick={() => removeScreenshot(i)}
+                        style={{ position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: "50%", background: "var(--red)", border: "none", color: "white", fontSize: 11, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                      >×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
             <button onClick={save} className="btn-primary" disabled={saving}>{saving ? "Saving…" : editing ? "Update Project" : "Add Project"}</button>

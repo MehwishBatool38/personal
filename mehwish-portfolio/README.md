@@ -1,4 +1,4 @@
-# 🚀 Ali Hassan — Personal Portfolio
+# 🚀 Mehwish Batool — Personal Portfolio
 
 > **"Building modern web & app experiences"**  
 > A sleek, fully responsive personal portfolio built with React + Vite — featuring a live CV generator, filterable project gallery, animated UI, and a password-protected admin panel.
@@ -199,10 +199,10 @@ This project can be deployed to any static hosting platform:
 
 ## 🤝 Contact
 
-**Ali Hassan**  
-📧 [raoali.edu@example.com](mailto:ali.hassan.edu@example.com)  
-🔗 [LinkedIn](https://linkedin.com/in/ali-hassan-edu)  
-💻 [GitHub](https://github.com/Ali-Hassan-edu)  
+**Mehwish Batool**  
+📧 [mehwishkhan2438@gmail.com](mailto:mehwishkhan2438@gmail.com)  
+🔗 [LinkedIn](https://www.linkedin.com/in/mehwish-batool-77029837b)  
+💻 [GitHub](https://github.com/mehwish-batool)  
 📍 Pakistan
 
 ---
@@ -214,5 +214,5 @@ This project is open source and available under the [MIT License](LICENSE).
 ---
 
 <p align="center">
-  Built with ❤️ by <strong>Ali Hassan</strong> · COMSATS University, Vehari
+  Built with ❤️ by <strong>Mehwish Batool</strong> · COMSATS University, Vehari
 </p>

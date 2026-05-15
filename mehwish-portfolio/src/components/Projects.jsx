@@ -54,7 +54,7 @@ export default function Projects({ projects }) {
             if (p.type === "app") {
               return <AppCard key={p.id} project={p} onViewGallery={(idx) => setModal({ project: p, idx: idx || 0 })} />;
             } else {
-              return <WebCard key={p.id} project={p} />;
+              return <WebCard key={p.id} project={p} onViewGallery={(idx) => setModal({ project: p, idx: idx || 0 })} />;
             }
           })}
         </div>
@@ -84,9 +84,9 @@ function SectionHeader() {
   );
 }
 
-function WebCard({ project: p }) {
+function WebCard({ project: p, onViewGallery }) {
   const techList = parseCSV(p.technologies);
-  const accentColor = p.color || "var(--red)";
+  const screenshots = Array.isArray(p.screenshots) ? p.screenshots.filter(Boolean) : (p.image_url ? [p.image_url] : []);
 
   return (
     <div className={`card project-card ${p.image_url ? 'has-media' : ''}`} style={{ height: "100%", minHeight: 300 }}>
@@ -119,16 +119,23 @@ function WebCard({ project: p }) {
                 Live Demo ↗
               </a>
             )}
+            {screenshots.length > 0 && (
+               <button onClick={() => onViewGallery(0)} style={{ background:"none", border:"none", fontSize: 12, fontWeight: 700, color: "var(--red)", cursor:"pointer", padding:0 }}>
+                 Gallery ({screenshots.length})
+               </button>
+            )}
             {p.github_link && (
-              <a href={p.github_link} target="_blank" rel="noreferrer" style={{ fontSize: 12, fontWeight: 700, color: "var(--muted)", textDecoration: "none" }}>
-                View GitHub ↗
+              <a href={p.github_link} target="_blank" rel="noreferrer" style={{ fontSize: 12, fontWeight: 700, color: "var(--muted)", textDecoration: "none", marginLeft: "auto" }}>
+                GitHub ↗
               </a>
             )}
           </div>
        </div>
 
        {p.image_url && (
-         <div className="project-media" style={{ borderLeft: "1px solid var(--border)", background: "var(--cream2)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+         <div className="project-media" 
+           onClick={() => onViewGallery(0)}
+           style={{ borderLeft: "1px solid var(--border)", background: "var(--cream2)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", cursor: "pointer" }}>
            <img src={p.image_url} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
          </div>
        )}
@@ -227,7 +234,9 @@ function AppCard({ project: p, onViewGallery }) {
 }
 
 function ScreenshotModal({ project: p, idx, setIdx, onClose }) {
-  const screenshots = Array.isArray(p.screenshots) ? p.screenshots.filter(Boolean) : [];
+  const screenshots = Array.isArray(p.screenshots) && p.screenshots.filter(Boolean).length > 0 
+    ? p.screenshots.filter(Boolean) 
+    : (p.image_url ? [p.image_url] : []);
   const total = screenshots.length;
 
   return (

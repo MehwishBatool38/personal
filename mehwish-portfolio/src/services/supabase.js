@@ -20,7 +20,7 @@ export async function uploadImage(file, folder = "uploads") {
   const fileExt = file.name.split('.').pop();
   const fileName = `${folder}/${Math.random().toString(36).substring(2, 12)}_${Date.now()}.${fileExt}`;
 
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
     .from('portfolio-images')
     .upload(fileName, file, {
       cacheControl: '3600',

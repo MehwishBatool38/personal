@@ -11,11 +11,21 @@ export default function Hero({ info }) {
     const role = ROLES[roleIdx];
     let t;
     if (typing) {
-      if (displayed.length < role.length) t = setTimeout(() => setDisplayed(role.slice(0, displayed.length + 1)), 75);
-      else t = setTimeout(() => setTyping(false), 2200);
+      if (displayed.length < role.length) {
+        t = setTimeout(() => setDisplayed(role.slice(0, displayed.length + 1)), 75);
+      } else {
+        t = setTimeout(() => setTyping(false), 2200);
+      }
     } else {
-      if (displayed.length > 0) t = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 35);
-      else { setRoleIdx((i) => (i + 1) % ROLES.length); setTyping(true); }
+      if (displayed.length > 0) {
+        t = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 35);
+      } else {
+        // Move state updates into a timeout to avoid synchronous setState in effect body
+        t = setTimeout(() => {
+          setRoleIdx((i) => (i + 1) % ROLES.length);
+          setTyping(true);
+        }, 0);
+      }
     }
     return () => clearTimeout(t);
   }, [displayed, typing, roleIdx]);

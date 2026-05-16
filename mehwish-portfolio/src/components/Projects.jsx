@@ -8,7 +8,6 @@ function parseCSV(value) {
 
 export default function Projects({ projects }) {
   const [modal, setModal] = useState(null);
-  const [filter, setFilter] = useState("All");
 
   useEffect(() => {
     if (!modal) return;
@@ -23,13 +22,7 @@ export default function Projects({ projects }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [modal]);
 
-  const types = ["All", "App", "Web"];
-  const shown = projects.filter(p => {
-    if (filter === "All") return true;
-    if (filter === "App") return p.type === "app";
-    if (filter === "Web") return p.type === "web";
-    return true;
-  });
+
 
   if (!projects || projects.length === 0) {
     return (
@@ -147,7 +140,7 @@ function AppCard({ project: p, onViewGallery }) {
   const techList = parseCSV(p.technologies);
   const featureList = parseCSV(p.features);
   const screenshots = Array.isArray(p.screenshots) ? p.screenshots.filter(Boolean) : [];
-  const accentColor = p.color || "#0ea5e9";
+
 
   return (
     <div className={`card project-card ${screenshots.length > 0 ? 'has-media' : ''}`} style={{ height: "100%", minHeight: 300 }}>

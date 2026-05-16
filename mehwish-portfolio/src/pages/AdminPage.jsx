@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { getProfile, updateProfile } from "../services/profileService";
 import { getProjects, addProject, updateProject, deleteProject } from "../services/projectsService";
-import { getBlogPosts, addBlogPost, updateBlogPost, deleteBlogPost } from "../services/blogService";
-import { estimateReadingTime } from "../utils/helpers";
 import { uploadImage } from "../services/supabase";
 
 const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASS || "mehwish2024";
@@ -402,7 +400,9 @@ function ProfileTab({ profile, setProfile, showMsg }) {
   const [saving, setSaving] = useState(false);
   const [cvUploading, setCvUploading] = useState(false);
 
-  useEffect(() => { setForm(profile || {}); }, [profile]);
+  useEffect(() => { 
+    if (profile) setTimeout(() => setForm(profile), 0); 
+  }, [profile]);
 
   async function save() {
     setSaving(true);

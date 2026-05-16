@@ -131,7 +131,7 @@ export default function Hero({ info }) {
               alignItems: "center",
               justifyContent: "center"
             }}>
-              <img src={info?.profile_pic || "/mehwish.jpeg"} alt={info?.name || "Mehwish Batool"} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img src={info?.profile_pic || "/mishi.jpeg"} alt={info?.name || "Mehwish Batool"} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
           </div>
         </div>

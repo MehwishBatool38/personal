@@ -26,7 +26,7 @@ const DEFAULT_INFO = {
   years_exp: 1,
   projects_count: 9,
   cv_url: "",
-  profile_pic: "/mehwish.jpeg"
+  profile_pic: "/mishi.jpeg"
 };
 
 const DEFAULT_PROJECTS = [

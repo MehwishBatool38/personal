@@ -436,7 +436,7 @@ function ProfileTab({ profile, setProfile, showMsg }) {
             {fields.map((f) => (
               <div key={f.k} style={{ gridColumn: f.full ? "1/-1" : undefined }}>
                 {f.k === 'profile_pic' ? (
-                  <ImageUploadField label={f.l} value={form[f.k]} onChange={(v) => setForm({ ...form, [f.k]: v })} circular />
+                  <ImageUploadField label={f.l} value={form[f.k]} onChange={(v) => setForm({ ...form, [f.k]: v })} showMsg={showMsg} circular />
                 ) : (
                   <>
                     <label className="admin-label">{f.l}</label>
@@ -461,10 +461,10 @@ function ProfileTab({ profile, setProfile, showMsg }) {
                                 try {
                                   const url = await uploadImage(file, "cvs");
                                   setForm({ ...form, cv_url: url });
-                                  showMsg("CV uploaded!");
+                                  showMsg("CV uploaded successfully!");
                                 } catch (err) { 
-                                  console.error(err);
-                                  alert(err.message); 
+                                  console.error("CV upload error:", err);
+                                  alert("CV upload failed: " + err.message); 
                                 } finally {
                                   setCvUploading(false);
                                 }
@@ -613,7 +613,7 @@ function ProjectsTab({ webProjects, appProjects, setWebProjects, setAppProjects,
             {form.type === "web" && <div><label className="admin-label">Live Link</label><input value={form.live_link || ""} onChange={(e) => setForm({ ...form, live_link: e.target.value })} placeholder="https://…" /></div>}
             <div><label className="admin-label">GitHub Link</label><input value={form.github_link || ""} onChange={(e) => setForm({ ...form, github_link: e.target.value })} placeholder="https://github.com/…" /></div>
             
-            {form.type === "web" && <ImageUploadField label="Image URL" value={form.image_url} onChange={(v) => setForm({ ...form, image_url: v })} />}
+            {form.type === "web" && <ImageUploadField label="Image URL" value={form.image_url} onChange={(v) => setForm({ ...form, image_url: v })} showMsg={showMsg} />}
             
             <div>
               <label className="admin-label">Project Gallery (Screenshots/Pictures)</label>
@@ -741,7 +741,7 @@ function SectionHeading({ title, subtitle }) {
   );
 }
 
-function ImageUploadField({ label, value, onChange, circular }) {
+function ImageUploadField({ label, value, onChange, circular, showMsg }) {
   const [uploading, setUploading] = useState(false);
 
   async function handleFile(e) {
@@ -751,8 +751,10 @@ function ImageUploadField({ label, value, onChange, circular }) {
     try {
       const url = await uploadImage(file);
       onChange(url);
+      if (showMsg) showMsg("Image uploaded successfully!");
     } catch (err) {
-      alert("Upload failed: " + err.message);
+      console.error("Image upload error:", err);
+      alert("Image upload failed: " + err.message);
     } finally {
       setUploading(false);
     }

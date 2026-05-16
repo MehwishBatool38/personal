@@ -45,9 +45,9 @@ export default function Projects({ projects }) {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 32 }}>
           {projects.map((p) => {
             if (p.type === "app") {
-              return <AppCard key={p.id} project={p} onViewGallery={(idx) => setModal({ project: p, idx: idx || 0 })} />;
+              return <AppCard key={`app-${p.id}`} project={p} onViewGallery={(idx) => setModal({ project: p, idx: idx || 0 })} />;
             } else {
-              return <WebCard key={p.id} project={p} onViewGallery={(idx) => setModal({ project: p, idx: idx || 0 })} />;
+              return <WebCard key={`web-${p.id}`} project={p} onViewGallery={(idx) => setModal({ project: p, idx: idx || 0 })} />;
             }
           })}
         </div>

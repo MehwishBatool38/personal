@@ -119,22 +119,20 @@ export default function Hero({ info }) {
           </div>
 
           <div className="hero-photo rv-r" style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
-            {info?.profile_pic && (
-              <div style={{
-                width: "min(420px, 80vw)",
-                height: "min(420px, 80vw)",
-                borderRadius: "50%",
-                overflow: "hidden",
-                boxShadow: "0 24px 60px rgba(0,0,0,0.12)",
-                border: "4px solid var(--cream)",
-                background: "var(--cream2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
-              }}>
-                <img src={info.profile_pic} alt={info.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              </div>
-            )}
+            <div style={{
+              width: "min(420px, 80vw)",
+              height: "min(420px, 80vw)",
+              borderRadius: "50%",
+              overflow: "hidden",
+              boxShadow: "0 24px 60px rgba(0,0,0,0.12)",
+              border: "4px solid var(--cream)",
+              background: "var(--cream2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}>
+              <img src={info?.profile_pic || "/mehwish.jpeg"} alt={info?.name || "Mehwish Batool"} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
           </div>
         </div>
       </div>

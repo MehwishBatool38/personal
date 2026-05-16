@@ -436,7 +436,7 @@ function ProfileTab({ profile, setProfile, showMsg }) {
             {fields.map((f) => (
               <div key={f.k} style={{ gridColumn: f.full ? "1/-1" : undefined }}>
                 {f.k === 'profile_pic' ? (
-                  <ImageUploadField label={f.l} value={form[f.k]} onChange={(v) => setForm({ ...form, [f.k]: v })} />
+                  <ImageUploadField label={f.l} value={form[f.k]} onChange={(v) => setForm({ ...form, [f.k]: v })} circular />
                 ) : (
                   <>
                     <label className="admin-label">{f.l}</label>
@@ -741,7 +741,7 @@ function SectionHeading({ title, subtitle }) {
   );
 }
 
-function ImageUploadField({ label, value, onChange }) {
+function ImageUploadField({ label, value, onChange, circular }) {
   const [uploading, setUploading] = useState(false);
 
   async function handleFile(e) {
@@ -764,8 +764,8 @@ function ImageUploadField({ label, value, onChange }) {
       <div style={{ display: "flex", gap: 8, flexDirection: "column" }}>
         {value ? (
            <div style={{position:"relative", width:100, height:100}}>
-             <img src={value} style={{width:"100%", height:"100%", objectFit:"cover", borderRadius:8}} />
-             <button onClick={() => onChange("")} style={{position:"absolute", top:-5, right:-5, background:"#0ea5e9", color:"white", border:"none", borderRadius:"50%", width:24, height:24, cursor:"pointer"}}>×</button>
+             <img src={value} style={{width:"100%", height:"100%", objectFit:"cover", borderRadius: circular ? "50%" : 8, border: circular ? "2px solid var(--red)" : "none"}} alt="" />
+             <button onClick={() => onChange("")} style={{position:"absolute", top:-5, right:-5, background:"var(--red)", color:"white", border:"none", borderRadius:"50%", width:24, height:24, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center"}}>×</button>
            </div>
         ) : (
           <div style={{ display: "flex", gap: 8 }}>

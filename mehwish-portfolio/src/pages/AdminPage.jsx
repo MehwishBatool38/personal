@@ -400,6 +400,7 @@ function DashboardTab({ webProjects, appProjects, profile, onTabChange }) {
 function ProfileTab({ profile, setProfile, showMsg }) {
   const [form, setForm] = useState(profile || {});
   const [saving, setSaving] = useState(false);
+  const [cvUploading, setCvUploading] = useState(false);
 
   useEffect(() => { setForm(profile || {}); }, [profile]);
 
@@ -447,20 +448,30 @@ function ProfileTab({ profile, setProfile, showMsg }) {
                       />
                       {f.k === 'cv_url' && (
                         <div style={{ position: "relative" }}>
+                          <button className="btn-secondary" style={{ whiteSpace: "nowrap", height: "100%" }} disabled={cvUploading}>
+                            {cvUploading ? "Uploading..." : "Upload PDF"}
+                          </button>
                           <input
                             type="file" accept=".pdf"
+                            disabled={cvUploading}
                             onChange={async (e) => {
                               const file = e.target.files[0];
                               if (file) {
+                                setCvUploading(true);
                                 try {
                                   const url = await uploadImage(file, "cvs");
                                   setForm({ ...form, cv_url: url });
-                                } catch (err) { alert(err.message); }
+                                  showMsg("CV uploaded!");
+                                } catch (err) { 
+                                  console.error(err);
+                                  alert(err.message); 
+                                } finally {
+                                  setCvUploading(false);
+                                }
                               }
                             }}
-                            style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}
+                            style={{ position: "absolute", inset: 0, opacity: 0, cursor: cvUploading ? "default" : "pointer" }}
                           />
-                          <button className="btn-secondary" style={{ whiteSpace: "nowrap", height: "100%" }}>Upload PDF</button>
                         </div>
                       )}
                     </div>

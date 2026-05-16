@@ -108,10 +108,22 @@ export default function Hero({ info }) {
             </div>
           </div>
 
-          {/* Right Block — Profile Photo */}
           <div className="hero-photo rv-r" style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
             {info?.profile_pic && (
-              <img src={info.profile_pic} alt={info.name} style={{ width: "100%", maxWidth: 450, height: "auto", objectFit: "contain", borderRadius: 24, boxShadow: "0 24px 60px rgba(0,0,0,0.08)" }} />
+              <div style={{
+                width: "min(420px, 80vw)",
+                height: "min(420px, 80vw)",
+                borderRadius: "50%",
+                overflow: "hidden",
+                boxShadow: "0 24px 60px rgba(0,0,0,0.12)",
+                border: "4px solid var(--cream)",
+                background: "var(--cream2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}>
+                <img src={info.profile_pic} alt={info.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
             )}
           </div>
         </div>

@@ -18,18 +18,22 @@ export const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "");
 export async function uploadImage(file, folder = "uploads") {
   if (!file) return null;
   const fileExt = file.name.split('.').pop();
-  const fileName = `${folder}/${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+  const fileName = `${folder}/${Math.random().toString(36).substring(2, 12)}_${Date.now()}.${fileExt}`;
 
   const { data, error } = await supabase.storage
-    .from('portfolio-images') // Bucket name in Supabase
+    .from('portfolio-images')
     .upload(fileName, file, {
       cacheControl: '3600',
-      upsert: false
+      upsert: false,
+      contentType: file.type
     });
 
   if (error) {
-    console.error('Error uploading image:', error.message);
-    throw new Error(error.message);
+    console.error('Upload error details:', error);
+    if (error.message === 'The resource was not found') {
+      throw new Error('Storage bucket "portfolio-images" not found. Please create it in your Supabase dashboard.');
+    }
+    throw new Error(`Upload failed: ${error.message}`);
   }
 
   const { data: publicUrlData } = supabase.storage

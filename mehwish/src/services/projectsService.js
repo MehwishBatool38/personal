@@ -16,9 +16,10 @@ export async function getProjects(type) {
 
 export async function addProject(project) {
   const table = tableFor(project.type);
+  const { type, ...projectData } = project;
   const { data, error } = await supabase
     .from(table)
-    .insert([project])
+    .insert([projectData])
     .select()
     .single();
   if (error) throw error;
@@ -27,9 +28,10 @@ export async function addProject(project) {
 
 export async function updateProject(id, project) {
   const table = tableFor(project.type);
+  const { type, ...projectData } = project;
   const { data, error } = await supabase
     .from(table)
-    .update(project)
+    .update(projectData)
     .eq("id", id)
     .select()
     .single();

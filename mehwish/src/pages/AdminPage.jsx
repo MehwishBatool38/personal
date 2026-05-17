@@ -92,6 +92,26 @@ const ADMIN_CSS = `
 }
 
 /* mobile admin */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--ink); color: var(--cream);
+  padding: 12px 24px; border-radius: 10px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  border: none; cursor: pointer; transition: all 0.2s;
+}
+.btn-primary:hover { background: var(--red); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-secondary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--cream2); color: var(--ink);
+  padding: 12px 24px; border-radius: 10px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;
+}
+.btn-secondary:hover { background: var(--border); }
+.btn-secondary:disabled { opacity: 0.6; cursor: not-allowed; }
+
 @media (max-width: 768px) {
   .admin-sidebar { display:none; }
   .admin-mobile-nav {
@@ -140,8 +160,10 @@ export default function AdminPage({ onBack }) {
       name: "Mehwish Batool", tagline: "Building modern web & app experiences",
       bio: "Software Engineering student at COMSATS University Islamabad, Vehari Campus.",
       university: "COMSATS University, Vehari", location: "Vehari, Pakistan",
-      email: "mehwishkhan2438@gmail.com", linkedin: "https://www.linkedin.com/in/mehwish-batool-77029837b",
-      github: "https://github.com/mehwish-batool", available: true, years_exp: 2, projects_count: 14,
+      email: "mehwishkhan2438@gmail.com", phone: "923197420679",
+      linkedin: "https://www.linkedin.com/in/mehwish-batool-77029837b",
+      github: "https://github.com/mehwish-batool", profile_pic: "", cv_url: "",
+      available: true, years_exp: 2, projects_count: 14,
     });
     setWebProjects(web);
     setAppProjects(app);
@@ -313,8 +335,8 @@ function DashboardTab({ webProjects, appProjects, profile, onTabChange }) {
 
   const recentItems = [
     ...webProjects.slice(0, 2).map(p => ({ ...p, _type: "Web Project" })),
-    ...appProjects.slice(0, 2).map((p) => ({ type: "project", label: `App: ${p.title}`, date: p.year || "Recently" })),
-  ].slice(0, 5);
+    ...appProjects.slice(0, 2).map(p => ({ ...p, _type: "App Project" })),
+  ].sort((a, b) => (b.id || 0) - (a.id || 0)).slice(0, 5);
 
   return (
     <div>
@@ -422,6 +444,7 @@ function ProfileTab({ profile, setProfile, showMsg }) {
     { l: "University", k: "university", type: "text" },
     { l: "Location", k: "location", type: "text" },
     { l: "Email", k: "email", type: "email" },
+    { l: "Phone / WhatsApp", k: "phone", type: "text" },
     { l: "LinkedIn URL", k: "linkedin", type: "url", full: true },
     { l: "GitHub URL", k: "github", type: "url", full: true },
     { l: "CV Download Link (PDF)", k: "cv_url", type: "url", full: true },
@@ -435,8 +458,8 @@ function ProfileTab({ profile, setProfile, showMsg }) {
           <div className="admin-grid-2" style={{ marginBottom: 14 }}>
             {fields.map((f) => (
               <div key={f.k} style={{ gridColumn: f.full ? "1/-1" : undefined }}>
-                {f.k === 'profile_pic' ? (
-                  <ImageUploadField label={f.l} value={form[f.k]} onChange={(v) => setForm({ ...form, [f.k]: v })} showMsg={showMsg} circular />
+              {f.k === 'profile_pic' ? (
+                  <ImageUploadField label={f.l} value={form[f.k]} onChange={(v) => setForm({ ...form, [f.k]: v })} showMsg={showMsg} circular folder="profiles" />
                 ) : (
                   <>
                     <label className="admin-label">{f.l}</label>
@@ -613,7 +636,7 @@ function ProjectsTab({ webProjects, appProjects, setWebProjects, setAppProjects,
             {form.type === "web" && <div><label className="admin-label">Live Link</label><input value={form.live_link || ""} onChange={(e) => setForm({ ...form, live_link: e.target.value })} placeholder="https://…" /></div>}
             <div><label className="admin-label">GitHub Link</label><input value={form.github_link || ""} onChange={(e) => setForm({ ...form, github_link: e.target.value })} placeholder="https://github.com/…" /></div>
             
-            {form.type === "web" && <ImageUploadField label="Image URL" value={form.image_url} onChange={(v) => setForm({ ...form, image_url: v })} showMsg={showMsg} />}
+            {form.type === "web" && <ImageUploadField label="Image URL" value={form.image_url} onChange={(v) => setForm({ ...form, image_url: v })} showMsg={showMsg} folder="projects" />}
             
             <div>
               <label className="admin-label">Project Gallery (Screenshots/Pictures)</label>
@@ -624,7 +647,7 @@ function ProjectsTab({ webProjects, appProjects, setWebProjects, setAppProjects,
                   <input type="file" accept="image/*" onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if(!file) return;
-                    try { const url = await uploadImage(file); setForm(f => ({...f, screenshots: [...(f.screenshots||[]), url]})); }
+                    try { const url = await uploadImage(file, "projects"); setForm(f => ({...f, screenshots: [...(f.screenshots||[]), url]})); }
                     catch(err) { alert(err.message); }
                   }} style={{ display: "none" }} />
                 </label>
@@ -657,6 +680,9 @@ function ProjectsTab({ webProjects, appProjects, setWebProjects, setAppProjects,
           <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 650, overflowY: "auto" }}>
             {allProjects.map((p) => (
               <div key={`${p.type}-${p.id}`} className="admin-item">
+                <div style={{ width: 44, height: 44, borderRadius: 8, background: "var(--cream2)", overflow: "hidden", flexShrink: 0, border: "1px solid var(--border)" }}>
+                  <img src={p.image_url || (p.screenshots?.[0]) || "https://placehold.co/100x100?text=No+Image"} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="admin-item-title">{p.title}</div>
                   <div className="admin-item-sub">
@@ -741,7 +767,7 @@ function SectionHeading({ title, subtitle }) {
   );
 }
 
-function ImageUploadField({ label, value, onChange, circular, showMsg }) {
+function ImageUploadField({ label, value, onChange, circular, showMsg, folder = "uploads" }) {
   const [uploading, setUploading] = useState(false);
 
   async function handleFile(e) {
@@ -749,7 +775,7 @@ function ImageUploadField({ label, value, onChange, circular, showMsg }) {
     if (!file) return;
     setUploading(true);
     try {
-      const url = await uploadImage(file);
+      const url = await uploadImage(file, folder);
       onChange(url);
       if (showMsg) showMsg("Image uploaded successfully!");
     } catch (err) {

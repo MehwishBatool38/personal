@@ -1,0 +1,3742 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduFee — Fee Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- App Config & API -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+         :root {
+            --navy: #0f2b4a;
+            --navy2: #163a60;
+            --navy3: #1e4d80;
+            --accent: #2563eb;
+            --accent-light: #eff6ff;
+            --accent2: #f59e0b;
+            --green: #10b981;
+            --red: #ef4444;
+            --orange: #f97316;
+            --bg: #f0f4f9;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text2: #475569;
+            --text3: #94a3b8;
+            --shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 4px 12px rgba(0, 0, 0, .05);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, .12);
+            --r: 10px;
+            --r-sm: 6px;
+            --font: 'Plus Jakarta Sans', sans-serif;
+            --font-display: 'Playfair Display', serif;
+        }
+        
+        html {
+            font-size: 15px;
+        }
+        
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+         ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        
+         ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+         ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        /* ── PAGE SECTIONS ── */
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: flex;
+        }
+        /* ── LOADING ── */
+        
+        #loading-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy3) 100%);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, .2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .loading-brand {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: #fff;
+            letter-spacing: -.02em;
+        }
+        
+        .loading-brand span {
+            color: var(--accent2);
+        }
+        /* ═══════════════════════════════════════
+   AUTH PAGES
+═══════════════════════════════════════ */
+        
+        #auth-page {
+            min-height: 100vh;
+            align-items: stretch;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy3) 100%);
+        }
+        
+        .auth-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 4rem;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .auth-left::before {
+            content: '';
+            position: absolute;
+            top: -120px;
+            right: -120px;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .04);
+        }
+        
+        .auth-left::after {
+            content: '';
+            position: absolute;
+            bottom: -80px;
+            left: -80px;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .03);
+        }
+        
+        .auth-brand {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            margin-bottom: 3rem;
+        }
+        
+        .auth-brand-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--accent2);
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            font-size: 1.3rem;
+        }
+        
+        .auth-brand-name {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            letter-spacing: -.01em;
+        }
+        
+        .auth-brand-name span {
+            color: var(--accent2);
+        }
+        
+        .auth-headline {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.2;
+            margin-bottom: 1.2rem;
+        }
+        
+        .auth-headline em {
+            color: var(--accent2);
+            font-style: normal;
+        }
+        
+        .auth-sub {
+            color: rgba(255, 255, 255, .6);
+            font-size: .95rem;
+            line-height: 1.7;
+            max-width: 380px;
+        }
+        
+        .auth-features {
+            margin-top: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: .8rem;
+        }
+        
+        .auth-feature {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            color: rgba(255, 255, 255, .8);
+            font-size: .88rem;
+        }
+        
+        .auth-feature-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent2);
+            flex-shrink: 0;
+        }
+        
+        .auth-right {
+            width: 460px;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem;
+        }
+        
+        .auth-card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .auth-tab-row {
+            display: flex;
+            gap: 0;
+            margin-bottom: 2rem;
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 4px;
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: .6rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-family: var(--font);
+            font-size: .85rem;
+            font-weight: 500;
+            color: var(--text2);
+            border-radius: 6px;
+            transition: all .2s;
+        }
+        
+        .auth-tab.active {
+            background: var(--surface);
+            color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .auth-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: .4rem;
+        }
+        
+        .auth-desc {
+            color: var(--text2);
+            font-size: .85rem;
+            margin-bottom: 1.8rem;
+        }
+        /* ── FORM ELEMENTS ── */
+        
+        .form-group {
+            margin-bottom: 1.1rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        label {
+            display: block;
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--text2);
+            margin-bottom: .4rem;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+        }
+        
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: .72rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-sm);
+            font-family: var(--font);
+            font-size: .9rem;
+            color: var(--text);
+            background: var(--surface);
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+        }
+        
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .1);
+        }
+        
+        input::placeholder {
+            color: var(--text3);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        input:disabled,
+        select:disabled {
+            background: var(--bg);
+            cursor: not-allowed;
+            opacity: .7;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            padding: .72rem 1.4rem;
+            border: none;
+            border-radius: var(--r-sm);
+            font-family: var(--font);
+            font-size: .88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            text-decoration: none;
+        }
+        
+        .btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            transform: none!important;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, .3);
+        }
+        
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text2);
+            border: 1.5px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .btn-danger {
+            background: #fff0f0;
+            color: var(--red);
+            border: 1.5px solid #fecaca;
+        }
+        
+        .btn-danger:hover {
+            background: var(--red);
+            color: #fff;
+        }
+        
+        .btn-success {
+            background: #f0fdf4;
+            color: var(--green);
+            border: 1.5px solid #bbf7d0;
+        }
+        
+        .btn-success:hover {
+            background: var(--green);
+            color: #fff;
+        }
+        
+        .btn-warning {
+            background: #fffbeb;
+            color: var(--accent2);
+            border: 1.5px solid #fde68a;
+        }
+        
+        .btn-warning:hover {
+            background: var(--accent2);
+            color: #fff;
+        }
+        
+        .btn-sm {
+            padding: .45rem 1rem;
+            font-size: .8rem;
+        }
+        
+        .btn-full {
+            width: 100%;
+        }
+        
+        .btn-icon {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border-radius: var(--r-sm);
+        }
+        
+        .demo-creds {
+            margin-top: 1.2rem;
+            padding: .9rem;
+            background: var(--accent-light);
+            border-radius: var(--r-sm);
+            border: 1px solid #bfdbfe;
+            font-size: .8rem;
+            color: var(--accent);
+            line-height: 1.7;
+        }
+        
+        .demo-creds strong {
+            display: block;
+            margin-bottom: .2rem;
+            color: var(--navy);
+        }
+        /* ═══════════════════════════════════════
+   APP LAYOUT
+═══════════════════════════════════════ */
+        
+        #app-page {
+            min-height: 100vh;
+            flex-direction: row;
+        }
+        
+        .sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background: var(--navy);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-brand {
+            padding: 1.5rem 1.4rem;
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+        }
+        
+        .sidebar-brand-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--accent2);
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-brand-name {
+            font-family: var(--font-display);
+            color: #fff;
+            font-size: 1.15rem;
+        }
+        
+        .sidebar-brand-name span {
+            color: var(--accent2);
+        }
+        
+        .sidebar-user {
+            padding: 1.2rem 1.4rem;
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+        }
+        
+        .sidebar-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            color: #fff;
+            font-size: .9rem;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-user-name {
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        
+        .sidebar-user-role {
+            color: rgba(255, 255, 255, .45);
+            font-size: .72rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+        
+        .sidebar-nav {
+            flex: 1;
+            padding: 1rem 0;
+        }
+        
+        .nav-section-label {
+            color: rgba(255, 255, 255, .3);
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            padding: .8rem 1.4rem .3rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .72rem 1.4rem;
+            color: rgba(255, 255, 255, .55);
+            font-size: .85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .2s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            color: rgba(255, 255, 255, .9);
+            background: rgba(255, 255, 255, .05);
+        }
+        
+        .nav-item.active {
+            color: #fff;
+            background: rgba(255, 255, 255, .1);
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 3px;
+            background: var(--accent2);
+            border-radius: 0 3px 3px 0;
+        }
+        
+        .nav-item-icon {
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .nav-badge {
+            margin-left: auto;
+            background: var(--red);
+            color: #fff;
+            font-size: .65rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+        }
+        
+        .sidebar-footer {
+            padding: 1rem 1.4rem;
+            border-top: 1px solid rgba(255, 255, 255, .08);
+        }
+        
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            color: rgba(255, 255, 255, .45);
+            font-size: .82rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: var(--font);
+            padding: .5rem;
+            width: 100%;
+            border-radius: 6px;
+            transition: all .2s;
+        }
+        
+        .logout-btn:hover {
+            color: var(--red);
+            background: rgba(239, 68, 68, .08);
+        }
+        /* MAIN CONTENT */
+        
+        .main-content {
+            flex: 1;
+            min-width: 0;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+        
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .topbar-title {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--text);
+        }
+        
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+        }
+        
+        .notif-btn {
+            position: relative;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--r-sm);
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all .2s;
+        }
+        
+        .notif-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .notif-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: var(--red);
+            border-radius: 50%;
+            border: 2px solid var(--surface);
+        }
+        
+        .content-body {
+            padding: 2rem;
+        }
+        /* ═══════════════════════════════════════
+   VIEWS
+═══════════════════════════════════════ */
+        
+        .view {
+            display: none;
+        }
+        
+        .view.active {
+            display: block;
+        }
+        
+        .page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .page-header-title {
+            font-family: var(--font-display);
+            font-size: 1.7rem;
+            margin-bottom: .2rem;
+        }
+        
+        .page-header-sub {
+            color: var(--text2);
+            font-size: .88rem;
+        }
+        
+        .page-header-actions {
+            display: flex;
+            gap: .6rem;
+            flex-wrap: wrap;
+        }
+        /* STAT CARDS */
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--surface);
+            border-radius: var(--r);
+            padding: 1.4rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            animation: fadeUp .5s ease both;
+        }
+        
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        
+        .stat-icon.blue {
+            background: #eff6ff;
+            color: var(--accent);
+        }
+        
+        .stat-icon.green {
+            background: #f0fdf4;
+            color: var(--green);
+        }
+        
+        .stat-icon.orange {
+            background: #fff7ed;
+            color: var(--orange);
+        }
+        
+        .stat-icon.red {
+            background: #fff0f0;
+            color: var(--red);
+        }
+        
+        .stat-icon.amber {
+            background: #fffbeb;
+            color: var(--accent2);
+        }
+        
+        .stat-icon.gray {
+            background: #f1f5f9;
+            color: var(--text2);
+        }
+        
+        .stat-value {
+            font-family: var(--font-display);
+            font-size: 1.7rem;
+            line-height: 1;
+            margin-bottom: .2rem;
+        }
+        
+        .stat-label {
+            color: var(--text2);
+            font-size: .8rem;
+            font-weight: 500;
+        }
+        /* CARDS */
+        
+        .card {
+            background: var(--surface);
+            border-radius: var(--r);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .card-title {
+            font-weight: 700;
+            font-size: .95rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        /* TABLE */
+        
+        .table-wrap {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .85rem;
+        }
+        
+        th {
+            text-align: left;
+            padding: .8rem 1rem;
+            font-size: .72rem;
+            font-weight: 700;
+            color: var(--text2);
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        
+        td {
+            padding: .9rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            vertical-align: middle;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover td {
+            background: #fafbfc;
+        }
+        /* BADGES */
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            padding: .25rem .7rem;
+            border-radius: 100px;
+            font-size: .72rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .badge-green {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .badge-red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .badge-amber {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge-blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .badge-gray {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        /* FORM CARD */
+        
+        .form-card {
+            background: var(--surface);
+            border-radius: var(--r);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+        /* MODAL */
+        
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            z-index: 500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-overlay.open {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 540px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: modalPop .3s ease both;
+        }
+        
+        @keyframes modalPop {
+            from {
+                opacity: 0;
+                transform: scale(.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-title {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+        }
+        
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: var(--bg);
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: grid;
+            place-items: center;
+            transition: background .2s;
+        }
+        
+        .modal-close:hover {
+            background: #fee2e2;
+            color: var(--red);
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: .75rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        /* TOAST */
+        
+        #toast-container {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+        }
+        
+        .toast {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: .9rem 1.2rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            min-width: 280px;
+            max-width: 360px;
+            animation: toastIn .35s ease both;
+            font-size: .85rem;
+            font-weight: 500;
+        }
+        
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .toast-icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        
+        .toast.success {
+            border-left: 4px solid var(--green);
+        }
+        
+        .toast.error {
+            border-left: 4px solid var(--red);
+        }
+        
+        .toast.info {
+            border-left: 4px solid var(--accent);
+        }
+        
+        .toast.warning {
+            border-left: 4px solid var(--accent2);
+        }
+        /* RECEIPT */
+        
+        .receipt {
+            background: #fff;
+            border: 2px solid var(--border);
+            border-radius: var(--r);
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .receipt-header {
+            text-align: center;
+            border-bottom: 2px dashed var(--border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .receipt-logo {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            color: var(--navy);
+            margin-bottom: .2rem;
+        }
+        
+        .receipt-logo span {
+            color: var(--accent2);
+        }
+        
+        .receipt-subtitle {
+            color: var(--text2);
+            font-size: .8rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+        }
+        
+        .receipt-title {
+            background: var(--navy);
+            color: #fff;
+            text-align: center;
+            padding: .6rem;
+            font-weight: 700;
+            font-size: .85rem;
+            letter-spacing: .1em;
+            margin-bottom: 1.5rem;
+            border-radius: 4px;
+        }
+        
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: .5rem 0;
+            font-size: .88rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .receipt-row:last-child {
+            border-bottom: none;
+        }
+        
+        .receipt-row-label {
+            color: var(--text2);
+        }
+        
+        .receipt-row-value {
+            font-weight: 600;
+        }
+        
+        .receipt-total {
+            background: var(--navy);
+            color: #fff;
+            padding: 1rem;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+        
+        .receipt-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text3);
+            font-size: .75rem;
+            border-top: 1px dashed var(--border);
+            padding-top: 1rem;
+        }
+        
+        .receipt-stamp {
+            display: inline-block;
+            border: 3px solid var(--green);
+            color: var(--green);
+            font-weight: 700;
+            padding: .4rem 1.2rem;
+            border-radius: 4px;
+            transform: rotate(-5deg);
+            font-size: 1.1rem;
+            letter-spacing: .1em;
+            margin-top: 1rem;
+        }
+        /* PROGRESS BAR */
+        
+        .progress-bar {
+            background: var(--bg);
+            border-radius: 100px;
+            height: 8px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 100px;
+            transition: width .6s ease;
+        }
+        
+        .progress-fill.green {
+            background: linear-gradient(to right, var(--green), #34d399);
+        }
+        
+        .progress-fill.orange {
+            background: linear-gradient(to right, var(--orange), #fbbf24);
+        }
+        
+        .progress-fill.red {
+            background: linear-gradient(to right, var(--red), #f97316);
+        }
+        /* NOTIFICATION */
+        
+        .notif-item {
+            display: flex;
+            gap: .75rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            transition: background .2s;
+            cursor: pointer;
+        }
+        
+        .notif-item:hover {
+            background: var(--bg);
+        }
+        
+        .notif-item.unread {
+            background: #eff6ff;
+        }
+        
+        .notif-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: .95rem;
+            flex-shrink: 0;
+        }
+        
+        .notif-msg {
+            font-size: .87rem;
+            line-height: 1.5;
+        }
+        
+        .notif-time {
+            font-size: .75rem;
+            color: var(--text3);
+            margin-top: .2rem;
+        }
+        /* PROFILE */
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--surface);
+            border-radius: var(--r);
+            border: 1px solid var(--border);
+        }
+        
+        .profile-avatar-lg {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: var(--navy);
+            display: grid;
+            place-items: center;
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        
+        .profile-name {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+        }
+        
+        .profile-role {
+            color: var(--text2);
+            font-size: .82rem;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            margin-top: .1rem;
+        }
+        
+        .profile-reg {
+            color: var(--accent);
+            font-size: .85rem;
+            font-weight: 600;
+            margin-top: .2rem;
+        }
+        /* FEE PLAN CARD */
+        
+        .plan-card {
+            background: var(--surface);
+            border-radius: var(--r);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .plan-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent), var(--navy3));
+        }
+        
+        .plan-name {
+            font-family: var(--font-display);
+            font-size: 1.15rem;
+            margin-bottom: .8rem;
+        }
+        
+        .plan-amount {
+            font-size: 1.7rem;
+            font-family: var(--font-display);
+            color: var(--accent);
+            margin-bottom: .3rem;
+        }
+        /* EMPTY STATE */
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .empty-state-icon {
+            font-size: 2.5rem;
+            margin-bottom: .8rem;
+        }
+        
+        .empty-state-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: .3rem;
+        }
+        
+        .empty-state-sub {
+            color: var(--text2);
+            font-size: .85rem;
+        }
+        /* SEARCH */
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: .5rem .9rem;
+        }
+        
+        .search-box input {
+            border: none;
+            background: none;
+            padding: 0;
+            font-size: .85rem;
+        }
+        
+        .search-box input:focus {
+            box-shadow: none;
+        }
+        /* RESPONSIVE */
+        
+        @media(max-width:768px) {
+            .sidebar {
+                display: none;
+            }
+            .auth-left {
+                display: none;
+            }
+            .auth-right {
+                width: 100%;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .content-body {
+                padding: 1.2rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media(max-width:480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* UTILS */
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-sm {
+            font-size: .82rem;
+        }
+        
+        .text-muted {
+            color: var(--text2);
+        }
+        
+        .text-green {
+            color: var(--green);
+        }
+        
+        .text-red {
+            color: var(--red);
+        }
+        
+        .text-amber {
+            color: var(--accent2);
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .gap-2 {
+            gap: .5rem;
+        }
+        
+        .mt-1 {
+            margin-top: .25rem;
+        }
+        
+        .mt-2 {
+            margin-top: .5rem;
+        }
+        
+        .mt-3 {
+            margin-top: .75rem;
+        }
+        
+        .mb-3 {
+            margin-bottom: .75rem;
+        }
+        
+        .fw-bold {
+            font-weight: 700;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.2rem;
+        }
+        
+        .hidden {
+            display: none!important;
+        }
+        
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 1.5rem 0;
+        }
+        
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            border-top: 1px solid var(--border);
+        }
+        
+        .section-divider span {
+            font-size: .75rem;
+            color: var(--text3);
+            white-space: nowrap;
+        }
+        
+        .actions-cell {
+            display: flex;
+            gap: .4rem;
+            flex-wrap: wrap;
+        }
+        
+        a.link {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        a.link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- LOADING -->
+    <div id="loading-page" class="page active">
+        <div class="loading-brand">Edu<span>Fee</span></div>
+        <div class="spinner"></div>
+    </div>
+
+    <!-- ═══════════════════ AUTH PAGE ═══════════════════ -->
+    <div id="auth-page" class="page">
+        <div class="auth-left">
+            <div class="auth-brand">
+                <div class="auth-brand-icon">🎓</div>
+                <div class="auth-brand-name">Edu<span>Fee</span></div>
+            </div>
+            <h1 class="auth-headline">Smart Fee<br>Management<br><em>Simplified</em></h1>
+            <p class="auth-sub">A complete solution to manage student fees, track payments, and send automated reminders — all in one place.</p>
+            <div class="auth-features">
+                <div class="auth-feature">
+                    <div class="auth-feature-dot"></div>Installment-based fee plans</div>
+                <div class="auth-feature">
+                    <div class="auth-feature-dot"></div>Real-time Supabase backend</div>
+                <div class="auth-feature">
+                    <div class="auth-feature-dot"></div>Printable receipt generation</div>
+                <div class="auth-feature">
+                    <div class="auth-feature-dot"></div>Live payment tracking</div>
+            </div>
+        </div>
+        <div class="auth-right">
+            <div class="auth-card">
+                <div class="auth-tab-row">
+                    <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+                    <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+                </div>
+                <!-- LOGIN -->
+                <div class="auth-form active" id="login-form">
+                    <div class="auth-title">Welcome back</div>
+                    <div class="auth-desc">Sign in to access your account</div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="login-email" placeholder="you@example.com" />
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="login-pass" placeholder="••••••••" />
+                        <div style="text-align: right; margin-top: 5px;">
+                            <a href="#" onclick="showResetPassword()" style="font-size: 13px; color: var(--accent); text-decoration: none;">Forgot Password?</a>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()" style="margin-top:.5rem;">Sign In →</button>
+                </div>
+                <!-- REGISTER -->
+                <div class="auth-form" id="register-form">
+                    <div class="auth-title">Create Account</div>
+                    <div class="auth-desc">Student self-registration</div>
+                    <div class="form-row">
+                        <div class="form-group"><label>First Name</label><input type="text" id="reg-fname" placeholder="Ali" /></div>
+                        <div class="form-group"><label>Last Name</label><input type="text" id="reg-lname" placeholder="Khan" /></div>
+                    </div>
+                    <div class="form-group"><label>Email Address</label><input type="email" id="reg-email" placeholder="ali@example.com" /></div>
+                    <div class="form-group"><label>Phone Number</label><input type="text" id="reg-phone" placeholder="+92 300 0000000" /></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Course</label><input type="text" id="reg-course" placeholder="BS Computer Science" /></div>
+                        <div class="form-group"><label>Batch</label><input type="text" id="reg-batch" placeholder="2024" /></div>
+                    </div>
+                    <div class="form-group"><label>Password</label><input type="password" id="reg-pass" placeholder="Minimum 6 characters" /></div>
+                    <button class="btn btn-primary btn-full" id="register-btn" onclick="doRegister()">Create Account →</button>
+                </div>
+                <!-- PASSWORD RESET -->
+                <div class="auth-form" id="reset-form">
+                    <div class="auth-title">Reset Password</div>
+                    <div class="auth-desc">Enter your email to receive a reset link</div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="reset-email" placeholder="you@example.com" />
+                    </div>
+                    <button class="btn btn-primary btn-full" id="reset-btn" onclick="doResetPassword()" style="margin-top:.5rem;">Send Reset Link →</button>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <a href="#" onclick="switchAuthTab('login')" style="font-size: 13px; color: var(--text3); text-decoration: none;">← Back to Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ APP PAGE ═══════════════════ -->
+    <div id="app-page" class="page">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-icon">🎓</div>
+                <div class="sidebar-brand-name">Edu<span>Fee</span></div>
+            </div>
+            <div class="sidebar-user">
+                <div class="sidebar-avatar" id="sb-avatar">A</div>
+                <div>
+                    <div class="sidebar-user-name" id="sb-name">Loading...</div>
+                    <div class="sidebar-user-role" id="sb-role">Role</div>
+                </div>
+            </div>
+            <!-- ACCOUNTANT NAV -->
+            <nav class="sidebar-nav hidden" id="accountant-nav">
+                <div class="nav-section-label">Overview</div>
+                <button class="nav-item active" onclick="showView('admin-dashboard')"><span class="nav-item-icon">📊</span> Dashboard</button>
+                <div class="nav-section-label">Students</div>
+                <button class="nav-item" onclick="showView('student-management')"><span class="nav-item-icon">👥</span> Student Management</button>
+                <div class="nav-section-label">Fee Management</div>
+                <button class="nav-item" onclick="showView('fee-plans')"><span class="nav-item-icon">📋</span> Fee Plans</button>
+                <button class="nav-item" onclick="showView('fee-assignments')"><span class="nav-item-icon">🔗</span> Assign Fees</button>
+                <button class="nav-item" onclick="showView('record-payment')"><span class="nav-item-icon">💳</span> Record Payment</button>
+                <div class="nav-section-label">Reports</div>
+                <button class="nav-item" onclick="showView('fee-tracking')"><span class="nav-item-icon">📈</span> Fee Tracking</button>
+                <button class="nav-item" onclick="showView('all-receipts')"><span class="nav-item-icon">🧾</span> All Receipts</button>
+                <button class="nav-item" onclick="showView('all-history')"><span class="nav-item-icon">📜</span> Payment History</button>
+                <div class="nav-section-label">System</div>
+                <button class="nav-item" onclick="showView('notifications')"><span class="nav-item-icon">🔔</span> Notifications<span class="nav-badge hidden" id="notif-badge">0</span></button>
+            </nav>
+            <!-- ADMIN NAV (View Only) -->
+            <nav class="sidebar-nav hidden" id="admin-nav">
+                <div class="nav-section-label">Overview</div>
+                <button class="nav-item active" onclick="showView('admin-dashboard')"><span class="nav-item-icon">📊</span> Dashboard</button>
+                <div class="nav-section-label">Students</div>
+                <button class="nav-item" onclick="showView('student-management')"><span class="nav-item-icon">👥</span> Registered Students</button>
+                <div class="nav-section-label">System</div>
+                <button class="nav-item" onclick="showView('notifications')"><span class="nav-item-icon">🔔</span> Notifications<span class="nav-badge hidden" id="notif-badge-admin">0</span></button>
+            </nav>
+            <!-- STUDENT NAV -->
+            <nav class="sidebar-nav hidden" id="student-nav">
+                <div class="nav-section-label">My Account</div>
+                <button class="nav-item active" onclick="showView('student-dashboard')"><span class="nav-item-icon">🏠</span> Dashboard</button>
+                <button class="nav-item" onclick="showView('my-profile')"><span class="nav-item-icon">👤</span> My Profile</button>
+                <div class="nav-section-label">Fees & Payments</div>
+                <button class="nav-item" onclick="showView('my-fees')"><span class="nav-item-icon">💰</span> My Fees</button>
+                <button class="nav-item" onclick="showView('my-dues')"><span class="nav-item-icon">⚠️</span> Pending Dues</button>
+                <button class="nav-item" onclick="showView('student-pay-fee')"><span class="nav-item-icon">💳</span> Pay Fee</button>
+                <button class="nav-item" onclick="showView('my-payments')"><span class="nav-item-icon">📜</span> Payment History</button>
+                <button class="nav-item" onclick="showView('my-receipts')"><span class="nav-item-icon">🧾</span> My Receipts</button>
+                <div class="nav-section-label">Alerts</div>
+                <button class="nav-item" onclick="showView('notifications')"><span class="nav-item-icon">🔔</span> Notifications<span class="nav-badge hidden" id="notif-badge-s">0</span></button>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="doLogout()">🚪 Sign Out</button>
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <div class="topbar">
+                <div class="topbar-title" id="topbar-title">Dashboard</div>
+                <div class="topbar-right">
+                    <button class="notif-btn" onclick="showView('notifications')" title="Notifications">🔔<span class="notif-dot hidden" id="notif-dot"></span></button>
+                    <div style="width:36px;height:36px;border-radius:50%;background:var(--navy);display:grid;place-items:center;color:#fff;font-weight:700;font-size:.85rem;" id="topbar-avatar">A</div>
+                </div>
+            </div>
+            <div class="content-body">
+
+                <!-- ════ ADMIN DASHBOARD ════ -->
+                <div class="view active" id="view-admin-dashboard">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">Overview</div>
+                            <div class="page-header-sub">Welcome back — here's what's happening today.</div>
+                        </div>
+                        <div class="page-header-actions"><button class="btn btn-primary" onclick="showView('record-payment')">+ Record Payment</button></div>
+                    </div>
+                    <div class="stats-grid" id="admin-stats"></div>
+                    <div class="grid-2" style="gap:1.5rem;">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">📋 Recent Payments</div><button class="btn btn-secondary btn-sm" onclick="showView('all-history')">View All</button></div>
+                            <div class="table-wrap" id="recent-payments-table"></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">⚠️ Pending Dues</div><button class="btn btn-secondary btn-sm" onclick="showView('fee-tracking')">View All</button></div>
+                            <div id="pending-dues-list" style="padding:1rem 0;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════ STUDENT MANAGEMENT ════ -->
+                <div class="view" id="view-student-management">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">User Management</div>
+                            <div class="page-header-sub">Add, update or remove user accounts</div>
+                        </div>
+                        <div class="page-header-actions"><button class="btn btn-primary" onclick="openModal('add-student-modal')">+ Add User</button></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">👥 All Users <span id="student-count-badge" class="badge badge-blue"></span></div>
+                            <div class="search-box" style="width:220px;"><span>🔍</span><input type="text" placeholder="Search users..." oninput="filterStudents(this.value)" id="student-search-input" /></div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Reg No.</th>
+                                        <th>Name</th>
+                                        <th>Course</th>
+                                        <th>Batch</th>
+                                        <th>Email</th>
+                                        <th>Fee Status</th>
+                                        <th>Details / Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="students-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════ FEE PLANS ════ -->
+                <div class="view" id="view-fee-plans">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">Fee Plans</div>
+                            <div class="page-header-sub">Create and manage fee structures with installments</div>
+                        </div>
+                        <div class="page-header-actions"><button class="btn btn-primary" onclick="openModal('fee-plan-modal')">+ New Fee Plan</button></div>
+                    </div>
+                    <div id="fee-plans-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.2rem;"></div>
+                </div>
+
+                <!-- ════ FEE ASSIGNMENTS ════ -->
+                <div class="view" id="view-fee-assignments">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">Assign Fees</div>
+                            <div class="page-header-sub">Assign fee plans to students</div>
+                        </div>
+                        <div class="page-header-actions"><button class="btn btn-primary" onclick="openModal('assign-fee-modal')">+ Assign Fee Plan</button></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📋 All Assignments</div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Reg No.</th>
+                                        <th>Fee Plan</th>
+                                        <th>Total</th>
+                                        <th>Paid</th>
+                                        <th>Remaining</th>
+                                        <th>Progress</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="assignments-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════ RECORD PAYMENT ════ -->
+                <div class="view" id="view-record-payment">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">Record Payment</div>
+                            <div class="page-header-sub">Process fee payment for a student</div>
+                        </div>
+                    </div>
+                    <div class="form-card" style="max-width:600px;">
+                        <div class="form-group"><label>Select Student</label>
+                            <select id="pay-student-select" onchange="loadStudentInstallments()"><option value="">-- Choose Student --</option></select>
+                        </div>
+                        <div id="no-assignment-msg" style="display:none;" class="demo-creds">⚠️ This student has no fee plan assigned. <a href="#" class="link" onclick="showView('fee-assignments');return false;">Assign a plan first.</a></div>
+                        <div id="student-fee-info" style="display:none;">
+                            <div class="form-group"><label>Select Installment</label>
+                                <select id="pay-installment-select" onchange="loadInstallmentAmount()"><option value="">-- Choose Installment --</option></select>
+                            </div>
+                            <div id="installment-details" style="display:none;margin-bottom:1rem;">
+                                <div style="padding:1rem;background:var(--accent-light);border-radius:var(--r-sm);border:1px solid #bfdbfe;font-size:.87rem;">
+                                    <div class="flex justify-between" style="gap:1rem;flex-wrap:wrap;">
+                                        <div><span class="text-muted">Amount:</span> <strong id="inst-amount-display">—</strong></div>
+                                        <div><span class="text-muted">Due Date:</span> <strong id="inst-due-display">—</strong></div>
+                                        <div><span class="text-muted">Status:</span> <span id="inst-status-display">—</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group"><label>Amount (PKR) *</label><input type="number" id="pay-amount" placeholder="0" /></div>
+                                <div class="form-group"><label>Payment Date *</label><input type="date" id="pay-date" /></div>
+                            </div>
+                            <div class="form-group"><label>Payment Method</label>
+                                <select id="pay-method">
+          <option value="Cash">Cash</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Cheque">Cheque</option>
+          <option value="Online">Online Payment</option>
+          <option value="JazzCash">JazzCash</option>
+          <option value="EasyPaisa">EasyPaisa</option>
+        </select>
+                            </div>
+                            <div class="form-group"><label>Notes (Optional)</label><textarea id="pay-notes" placeholder="Any remarks..."></textarea></div>
+                            <button class="btn btn-primary btn-full" id="pay-btn" onclick="recordPayment()">💳 Record Payment</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════ FEE TRACKING ════ -->
+                <div class="view" id="view-fee-tracking">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">Fee Tracking</div>
+                            <div class="page-header-sub">Monitor payment status across all students</div>
+                        </div>
+                    </div>
+                    <div class="stats-grid" id="tracking-stats"></div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📊 Student Fee Status</div>
+                            <div class="page-header-actions">
+                                <button class="btn btn-primary btn-sm" id="track-all-btn" onclick="filterTracking('all')">All</button>
+                                <button class="btn btn-secondary btn-sm" id="track-pending-btn" onclick="filterTracking('pending')">Unpaid</button>
+                                <button class="btn btn-secondary btn-sm" id="track-partial-btn" onclick="filterTracking('partial')">Partial</button>
+                                <button class="btn btn-secondary btn-sm" id="track-paid-btn" onclick="filterTracking('paid')">Fully Paid</button>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Fee Plan</th>
+                                        <th>Total</th>
+                                        <th>Paid</th>
+                                        <th>Remaining</th>
+                                        <th>Next Due</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tracking-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════ ALL RECEIPTS ════ -->
+                <div class="view" id="view-all-receipts">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">All Receipts</div>
+                            <div class="page-header-sub">View and print payment receipts</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">🧾 Receipts</div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Receipt No.</th>
+                                        <th>Student</th>
+                                        <th>Installment</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="all-receipts-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════ PAYMENT HISTORY ════ -->
+                <div class="view" id="view-all-history">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">Payment History</div>
+                            <div class="page-header-sub">Complete transaction log</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📜 All Transactions</div>
+                            <div class="search-box" style="width:220px;"><span>🔍</span><input type="text" placeholder="Search..." oninput="filterHistory(this.value)" /></div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Receipt No.</th>
+                                        <th>Date</th>
+                                        <th>Student</th>
+                                        <th>Plan</th>
+                                        <th>Installment</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════ NOTIFICATIONS ════ -->
+                <div class="view" id="view-notifications">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">Notifications</div>
+                            <div class="page-header-sub">Activity alerts and updates</div>
+                        </div>
+                        <div class="page-header-actions"><button class="btn btn-secondary" onclick="markAllRead()">✓ Mark All Read</button></div>
+                    </div>
+                    <div class="card" style="padding:0;">
+                        <div id="notifications-list"></div>
+                    </div>
+                </div>
+
+                <!-- ════ STUDENT DASHBOARD ════ -->
+                <div class="view" id="view-student-dashboard">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">My Dashboard</div>
+                            <div class="page-header-sub" id="student-welcome-sub">Welcome back!</div>
+                        </div>
+                    </div>
+                    <div class="stats-grid" id="student-stats"></div>
+                    <div class="grid-2" style="gap:1.5rem;">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">📅 Installment Schedule</div><button class="btn btn-secondary btn-sm" onclick="showView('my-fees')">View Details</button></div>
+                            <div id="my-installments-list"></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">💳 Recent Payments</div><button class="btn btn-secondary btn-sm" onclick="showView('my-payments')">View All</button></div>
+                            <div id="my-recent-payments"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════ MY PROFILE ════ -->
+                <div class="view" id="view-my-profile">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">My Profile</div>
+                            <div class="page-header-sub">View and manage your account details</div>
+                        </div>
+                        <div class="page-header-actions"><button class="btn btn-primary" onclick="openModal('edit-profile-modal')">✏️ Edit Profile</button></div>
+                    </div>
+                    <div id="profile-content"></div>
+                </div>
+
+                <!-- ════ MY FEES ════ -->
+                <div class="view" id="view-my-fees">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">My Fees</div>
+                            <div class="page-header-sub">Your fee plan and installment schedule</div>
+                        </div>
+                    </div>
+                    <div id="my-fees-content"></div>
+                </div>
+
+                <!-- ════ PENDING DUES ════ -->
+                <div class="view" id="view-my-dues">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">Pending Dues</div>
+                            <div class="page-header-sub">Outstanding installments requiring payment</div>
+                        </div>
+                    </div>
+                    <div id="my-dues-content"></div>
+                </div>
+
+                <!-- ════ MY PAYMENTS ════ -->
+                <div class="view" id="view-my-payments">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">Payment History</div>
+                            <div class="page-header-sub">Your transaction record</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📜 My Transactions</div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Receipt No.</th>
+                                        <th>Date</th>
+                                        <th>Installment</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Receipt</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="my-payments-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════ MY RECEIPTS ════ -->
+                <div class="view" id="view-my-receipts">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">My Receipts</div>
+                            <div class="page-header-sub">Download or print your payment receipts</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">🧾 My Receipts</div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Receipt No.</th>
+                                        <th>Installment</th>
+                                        <th>Amount</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="my-receipts-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════ STUDENT PAY FEE ════ -->
+                <div class="view" id="view-student-pay-fee">
+                    <div class="page-header">
+                        <div>
+                            <div class="page-header-title">Pay Fee Online</div>
+                            <div class="page-header-sub">Securely pay your installments from your portal</div>
+                        </div>
+                    </div>
+                    <div class="form-card" style="max-width:600px;">
+                        <div id="student-pay-no-asgn" style="display:none;" class="demo-creds">⚠️ No fee plan assigned. You cannot make payments at this time.</div>
+                        <div id="student-pay-form" style="display:none;">
+                            <div class="form-group"><label>Select Installment</label>
+                                <select id="sp-installment-select" onchange="loadStudentPayAmount()"><option value="">-- Choose Installment --</option></select>
+                            </div>
+                            <div id="sp-installment-details" style="display:none;margin-bottom:1rem;">
+                                <div style="padding:1rem;background:var(--accent-light);border-radius:var(--r-sm);border:1px solid #bfdbfe;font-size:.87rem;">
+                                    <div class="flex justify-between" style="gap:1rem;flex-wrap:wrap;">
+                                        <div><span class="text-muted">Amount:</span> <strong id="sp-amount-display">—</strong></div>
+                                        <div><span class="text-muted">Due Date:</span> <strong id="sp-due-display">—</strong></div>
+                                        <div><span class="text-muted">Status:</span> <span id="sp-status-display">—</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group"><label>Amount (PKR) *</label><input type="number" id="sp-amount" placeholder="0" /></div>
+                                <div class="form-group"><label>Payment Method</label>
+                                    <select id="sp-method">
+                <option value="Online">Online Payment</option>
+                <option value="JazzCash">JazzCash</option>
+                <option value="EasyPaisa">EasyPaisa</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+              </select>
+                                </div>
+                            </div>
+                            <div class="form-group"><label>Payment Date</label><input type="date" id="sp-date" readonly /></div>
+                            <div class="form-group"><label>Notes (Optional)</label><textarea id="sp-notes" placeholder="e.g., Paid via JazzCash App"></textarea></div>
+                            <button class="btn btn-primary btn-full" id="sp-btn" onclick="studentProcessPayment()">💳 Pay Now</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- end content-body -->
+        </div>
+        <!-- end main-content -->
+    </div>
+    <!-- end app-page -->
+
+    <!-- ═══════ MODALS ═══════ -->
+
+    <!-- ADD STUDENT -->
+    <div class="modal-overlay" id="add-student-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Add User</div><button class="modal-close" onclick="closeModal('add-student-modal')">✕</button></div>
+            <div class="form-row">
+                <div class="form-group"><label>First Name</label><input type="text" id="as-fname" placeholder="Ali" /></div>
+                <div class="form-group"><label>Last Name</label><input type="text" id="as-lname" placeholder="Khan" /></div>
+            </div>
+            <div class="form-group"><label>Email</label><input type="email" id="as-email" placeholder="ali@example.com" /></div>
+            <div class="form-group"><label>Role</label>
+                <select id="as-role">
+                    <option value="student">Student</option>
+                    <option value="accountant">Accountant</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Phone</label><input type="text" id="as-phone" placeholder="+92 300 0000000" /></div>
+            <div class="form-row">
+                <div class="form-group"><label>Course</label><input type="text" id="as-course" placeholder="BS Computer Science" /></div>
+                <div class="form-group"><label>Batch</label><input type="text" id="as-batch" placeholder="2024" /></div>
+            </div>
+            <div class="form-group"><label>Initial Password</label><input type="text" id="as-pass" value="User@123" /></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('add-student-modal')">Cancel</button>
+                <button class="btn btn-primary" id="add-student-btn" onclick="adminAddUser()">Add User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT STUDENT -->
+    <div class="modal-overlay" id="edit-student-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Edit Student</div><button class="modal-close" onclick="closeModal('edit-student-modal')">✕</button></div>
+            <input type="hidden" id="es-id" />
+            <div class="form-row">
+                <div class="form-group"><label>First Name</label><input type="text" id="es-fname" /></div>
+                <div class="form-group"><label>Last Name</label><input type="text" id="es-lname" /></div>
+            </div>
+            <div class="form-group"><label>Email</label><input type="email" id="es-email" disabled/></div>
+            <div class="form-group"><label>Phone</label><input type="text" id="es-phone" /></div>
+            <div class="form-row">
+                <div class="form-group"><label>Course</label><input type="text" id="es-course" /></div>
+                <div class="form-group"><label>Batch</label><input type="text" id="es-batch" /></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('edit-student-modal')">Cancel</button>
+                <button class="btn btn-primary" id="edit-student-save-btn" onclick="saveStudentEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FEE PLAN MODAL -->
+    <div class="modal-overlay" id="fee-plan-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Create Fee Plan</div><button class="modal-close" onclick="closeModal('fee-plan-modal')">✕</button></div>
+            <div class="form-group"><label>Plan Name</label><input type="text" id="fp-name" placeholder="e.g., Annual Fee 2024" /></div>
+            <div class="form-row">
+                <div class="form-group"><label>Total Amount (PKR)</label><input type="number" id="fp-total" placeholder="50000" oninput="generateInstallmentFields()" /></div>
+                <div class="form-group"><label>No. of Installments</label>
+                    <select id="fp-installments" onchange="generateInstallmentFields()">
+          <option value="1">1 (Full Payment)</option>
+          <option value="2">2 Installments</option>
+          <option value="3" selected>3 Installments</option>
+          <option value="4">4 Installments</option>
+          <option value="6">6 Installments</option>
+          <option value="12">12 Installments</option>
+        </select>
+                </div>
+            </div>
+            <div id="installment-fields"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('fee-plan-modal')">Cancel</button>
+                <button class="btn btn-primary" id="create-plan-btn" onclick="createFeePlan()">Create Plan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASSIGN FEE MODAL -->
+    <div class="modal-overlay" id="assign-fee-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Assign Fee Plan</div><button class="modal-close" onclick="closeModal('assign-fee-modal')">✕</button></div>
+            <div class="form-group"><label>Select Student</label><select id="af-student"><option value="">-- Select Student --</option></select></div>
+            <div class="form-group"><label>Select Fee Plan</label><select id="af-plan"><option value="">-- Select Fee Plan --</option></select></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('assign-fee-modal')">Cancel</button>
+                <button class="btn btn-primary" id="assign-btn" onclick="assignFeePlan()">Assign Plan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECEIPT MODAL -->
+    <div class="modal-overlay" id="receipt-modal">
+        <div class="modal" style="max-width:640px;">
+            <div class="modal-header">
+                <div class="modal-title">Fee Receipt</div><button class="modal-close" onclick="closeModal('receipt-modal')">✕</button></div>
+            <div id="receipt-content"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('receipt-modal')">Close</button>
+                <button class="btn btn-primary" onclick="printReceipt()">🖨️ Print Receipt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT PROFILE -->
+    <div class="modal-overlay" id="edit-profile-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Edit Profile</div><button class="modal-close" onclick="closeModal('edit-profile-modal')">✕</button></div>
+            <div class="form-row">
+                <div class="form-group"><label>First Name</label><input type="text" id="ep-fname" /></div>
+                <div class="form-group"><label>Last Name</label><input type="text" id="ep-lname" /></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Course</label><input type="text" id="ep-course" /></div>
+                <div class="form-group"><label>Batch</label><input type="text" id="ep-batch" /></div>
+            </div>
+            <div class="form-group"><label>Phone</label><input type="text" id="ep-phone" /></div>
+            <div class="form-group"><label>Address</label><textarea id="ep-address" rows="2"></textarea></div>
+            <div class="section-divider"><span>Change Password (optional)</span></div>
+            <div class="form-group"><label>New Password</label><input type="password" id="ep-pass" placeholder="Leave blank to keep current" /></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('edit-profile-modal')">Cancel</button>
+                <button class="btn btn-primary" id="save-profile-btn" onclick="saveProfile()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        // APP STATE
+        // ═══════════════════════════════════════════════════════════
+        let APP = {
+            user: null, // auth user
+            profile: null, // profiles row
+            students: [],
+            plans: [],
+            assignments: [],
+            payments: [],
+            notifications: [],
+            trackFilter: 'all',
+            realtimeSub: null,
+        };
+
+        // ═══════════════════════════════════════════════════════════
+        // BOOT
+        // ═══════════════════════════════════════════════════════════
+        (async function boot() {
+            showPage('loading-page');
+            try {
+                const session = await Auth.getSession();
+                if (session) {
+                    const profile = await Profiles.getMe();
+                    if (profile) {
+                        APP.user = session.user;
+                        APP.profile = profile;
+                        await loadAppData();
+                        launchApp();
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.warn('Boot error:', e.message);
+            }
+            showPage('auth-page');
+        })();
+
+        Auth.onAuthStateChange(async(event, session) => {
+            if (event === 'SIGNED_IN' && session && !APP.profile) {
+                // handled by doLogin
+            } else if (event === 'SIGNED_OUT') {
+                APP = {
+                    user: null,
+                    profile: null,
+                    students: [],
+                    plans: [],
+                    assignments: [],
+                    payments: [],
+                    notifications: [],
+                    trackFilter: 'all',
+                    realtimeSub: null
+                };
+                showPage('auth-page');
+            }
+        });
+
+        // ═══════════════════════════════════════════════════════════
+        // DATA LOADING
+        // ═══════════════════════════════════════════════════════════
+        async function loadAppData() {
+            try {
+                if (APP.profile.role === 'accountant') {
+                    const [students, plans, assignments, payments] = await Promise.all([
+                        Profiles.getAll(),
+                        FeePlans.getAll(),
+                        FeeAssignments.getAll(),
+                        Payments.getAll(),
+                    ]);
+                    APP.students = (students || []).filter(u => u.role === 'student');
+                    APP.plans = plans || [];
+                    APP.assignments = assignments || [];
+                    APP.payments = payments || [];
+                    APP.notifications = [];
+                } else if (APP.profile.role === 'admin') {
+                    const [students, assignments, payments] = await Promise.all([
+                        Profiles.getAll(),
+                        FeeAssignments.getAll(),
+                        Payments.getAll(),
+                    ]);
+                    APP.students = (students || []).filter(u => u.role === 'student');
+                    APP.plans = [];
+                    APP.assignments = assignments || [];
+                    APP.payments = payments || [];
+                    APP.notifications = [];
+                } else {
+                    const asgn = await FeeAssignments.getForStudent(APP.profile.id);
+                    const [payments, notifs] = await Promise.all([
+                        Payments.getForStudent(APP.profile.id),
+                        Notifications.getForUser(APP.profile.id, 'student'),
+                    ]);
+                    APP.assignments = asgn || [];
+                    APP.payments = payments || [];
+                    APP.notifications = notifs || [];
+                }
+                // Apply fines if accountant
+                if (APP.profile.role === 'accountant') {
+                    Fines.calculateAndApplyFines().then(fines => {
+                        if (fines.length > 0) {
+                            toast(`Applied ${fines.length} fine(s)`, 'info');
+                            refreshData(); // Refresh to update fines
+                        }
+                    }).catch(e => console.error('Fine calculation error:', e));
+                }
+            } catch (e) {
+                console.error('Data loading error:', e);
+                toast('Error loading data: ' + e.message, 'error');
+            }
+        }
+
+        async function refreshData() {
+            await loadAppData();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // AUTH
+        // ═══════════════════════════════════════════════════════════
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            if (tab === 'login' || tab === 'register') {
+                const tabs = document.querySelectorAll('.auth-tab');
+                if (tab === 'login') tabs[0].classList.add('active');
+                else tabs[1].classList.add('active');
+            }
+            qs('#' + tab + '-form').classList.add('active');
+        }
+
+        function showResetPassword() {
+            document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            qs('#reset-form').classList.add('active');
+        }
+
+        async function doResetPassword() {
+            const email = v('reset-email').trim().toLowerCase();
+            if (!email) {
+                toast('Please enter your email', 'error');
+                return;
+            }
+            setLoading('reset-btn', true, 'Sending email...');
+            try {
+                await Auth.resetPassword(email);
+                toast('Reset link sent! Check your inbox.', 'success');
+                switchAuthTab('login');
+            } catch (e) {
+                toast(e.message || 'Failed to send reset link', 'error');
+            } finally {
+                setLoading('reset-btn', false, 'Send Reset Link →');
+            }
+        }
+
+        async function doLogin() {
+            const email = v('login-email').trim().toLowerCase();
+            const pass = v('login-pass');
+            if (!email || !pass) {
+                toast('Please enter email and password', 'error');
+                return;
+            }
+            setLoading('login-btn', true, 'Signing in...');
+            try {
+                // Check for hardcoded admin and accountant
+                if ((email === 'admin@gmail.com' && pass === 'Admin@123') ||
+                    (email === 'accountant@gmail.com' && pass === 'Accountant@123')) {
+                    // Create mock session for hardcoded users
+                    APP.user = {
+                        id: email === 'admin@gmail.com' ? 'admin-user-id' : 'accountant-user-id',
+                        email: email,
+                        user_metadata: {
+                            role: email === 'admin@gmail.com' ? 'admin' : 'accountant',
+                            fname: email === 'admin@gmail.com' ? 'John' : 'Sara',
+                            lname: email === 'admin@gmail.com' ? 'Admin' : 'Lee'
+                        }
+                    };
+                    APP.profile = {
+                        id: APP.user.id,
+                        email: email,
+                        role: APP.user.user_metadata.role,
+                        fname: APP.user.user_metadata.fname,
+                        lname: APP.user.user_metadata.lname,
+                        reg_no: email === 'admin@gmail.com' ? 'ADM-001' : 'ACC-001'
+                    };
+                    await loadAppData();
+                    launchApp();
+                } else {
+                    // Use Supabase for students
+                    const { session } = await Auth.signIn(email, pass);
+                    APP.user = session.user;
+                    APP.profile = await Profiles.getMe();
+                    await loadAppData();
+                    launchApp();
+                }
+            } catch (e) {
+                toast(e.message || 'Invalid email or password', 'error');
+            } finally {
+                setLoading('login-btn', false, 'Sign In →');
+            }
+        }
+
+        async function doRegister() {
+            const fname = v('reg-fname').trim();
+            const lname = v('reg-lname').trim();
+            const email = v('reg-email').trim().toLowerCase();
+            const phone = v('reg-phone').trim();
+            const course = v('reg-course').trim();
+            const batch = v('reg-batch').trim();
+            const pass = v('reg-pass');
+            if (!fname || !lname || !email || !pass) {
+                toast('Please fill all required fields', 'error');
+                return;
+            }
+            if (pass.length < 6) {
+                toast('Password must be at least 6 characters', 'error');
+                return;
+            }
+            setLoading('register-btn', true, 'Creating account...');
+            try {
+                await Auth.signUp({
+                    email,
+                    password: pass,
+                    fname,
+                    lname,
+                    phone,
+                    course,
+                    batch
+                });
+                toast('Account created! Please check your email to confirm, then sign in.', 'success');
+                sv('login-email', email);
+                switchAuthTab('login');
+            } catch (e) {
+                toast(e.message || 'Registration failed', 'error');
+            } finally {
+                setLoading('register-btn', false, 'Create Account →');
+            }
+        }
+
+        async function doLogout() {
+            try {
+                await Auth.signOut();
+            } catch (e) { /* ignore */ }
+            if (APP.realtimeSub) APP.realtimeSub.unsubscribe();
+            showPage('auth-page');
+            toast('Signed out successfully', 'info');
+        }
+
+        function launchApp() {
+            const p = APP.profile;
+            qs('#sb-name').textContent = p.fname + ' ' + p.lname;
+            qs('#sb-role').textContent = p.role === 'admin' ? 'Administrator' : p.role === 'accountant' ? 'Accountant' : 'Student';
+            qs('#sb-avatar').textContent = p.fname[0].toUpperCase();
+            qs('#topbar-avatar').textContent = p.fname[0].toUpperCase();
+            if (p.role === 'accountant') {
+                qs('#accountant-nav').classList.remove('hidden');
+                qs('#admin-nav').classList.add('hidden');
+                qs('#student-nav').classList.add('hidden');
+                showView('admin-dashboard');
+            } else if (p.role === 'admin') {
+                qs('#admin-nav').classList.remove('hidden');
+                qs('#accountant-nav').classList.add('hidden');
+                qs('#student-nav').classList.add('hidden');
+                showView('admin-dashboard');
+            } else {
+                qs('#student-nav').classList.remove('hidden');
+                qs('#admin-nav').classList.add('hidden');
+                qs('#accountant-nav').classList.add('hidden');
+                showView('student-dashboard');
+                // Subscribe to realtime notifications
+                APP.realtimeSub = Realtime.subscribeToNotifications(p.id, async() => {
+                    APP.notifications = await Notifications.getForUser(p.id, 'student');
+                    updateNotifBadge();
+                });
+            }
+            updateNotifBadge();
+            showPage('app-page');
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // NAVIGATION
+        // ═══════════════════════════════════════════════════════════
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            qs('#' + id).classList.add('active');
+        }
+
+        const VIEW_TITLES = {
+            'admin-dashboard': 'Dashboard',
+            'student-management': 'Student Management',
+            'fee-plans': 'Fee Plans',
+            'fee-assignments': 'Assign Fees',
+            'record-payment': 'Record Payment',
+            'fee-tracking': 'Fee Tracking',
+            'all-receipts': 'All Receipts',
+            'all-history': 'Payment History',
+            'notifications': 'Notifications',
+            'student-dashboard': 'My Dashboard',
+            'my-profile': 'My Profile',
+            'my-fees': 'My Fees',
+            'my-dues': 'Pending Dues',
+            'my-payments': 'Payment History',
+            'my-receipts': 'My Receipts',
+            'student-pay-fee': 'Pay Fee',
+        };
+
+        function showView(id) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            qs('#view-' + id).classList.add('active');
+            qs('#topbar-title').textContent = VIEW_TITLES[id] || id;
+            document.querySelectorAll('.nav-item').forEach(n => {
+                n.classList.remove('active');
+                if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) n.classList.add('active');
+            });
+            renderView(id);
+        }
+
+        async function renderView(id) {
+            await refreshData();
+            const fns = {
+                'admin-dashboard': renderAdminDashboard,
+                'student-management': renderStudentManagement,
+                'fee-plans': renderFeePlans,
+                'fee-assignments': renderFeeAssignments,
+                'record-payment': renderRecordPayment,
+                'fee-tracking': renderFeeTracking,
+                'all-receipts': renderAllReceipts,
+                'all-history': renderAllHistory,
+                'notifications': renderNotifications,
+                'student-dashboard': renderStudentDashboard,
+                'my-profile': renderMyProfile,
+                'my-fees': renderMyFees,
+                'my-dues': renderMyDues,
+                'my-payments': renderMyPayments,
+                'my-receipts': renderMyReceipts,
+                'student-pay-fee': renderStudentPayFee,
+            };
+            if (fns[id]) fns[id]();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ADMIN DASHBOARD
+        // ═══════════════════════════════════════════════════════════
+        function renderAdminDashboard() {
+            const totalCollected = APP.payments.reduce((s, p) => s + parseFloat(p.amount), 0);
+            let totalFee = 0,
+                totalPaid = 0;
+            APP.assignments.forEach(a => {
+                const total = parseFloat((a.fee_plans && a.fee_plans.total) ? a.fee_plans.total : 0);
+                totalFee += total;
+                const paid = APP.payments.filter(p => p.assignment_id === a.id).reduce((s, p) => s + parseFloat(p.amount), 0);
+                totalPaid += paid;
+            });
+
+            if (APP.profile.role === 'accountant') {
+                qs('#admin-stats').innerHTML =
+                    statCard('👥', 'Total Students', APP.students.length, '', 'blue') +
+                    statCard('💰', 'Total Collected', 'PKR ' + fmt(totalCollected), '', 'green') +
+                    statCard('⏳', 'Pending Dues', 'PKR ' + fmt(Math.max(0, totalFee - totalPaid)), '', 'red') +
+                    statCard('📋', 'Fee Plans', APP.plans.length, '', 'amber');
+            } else if (APP.profile.role === 'admin') {
+                qs('#admin-stats').innerHTML =
+                    statCard('👥', 'Total Students', APP.students.length, '', 'blue') +
+                    statCard('💰', 'Total Collected', 'PKR ' + fmt(totalCollected), '', 'green') +
+                    statCard('⏳', 'Pending Dues', 'PKR ' + fmt(Math.max(0, totalFee - totalPaid)), '', 'red') +
+                    statCard('📋', 'Fee Assignments', APP.assignments.length, '', 'amber');
+            }
+
+            // Recent payments
+            const recent = [...APP.payments].slice(0, 5);
+            if (!recent.length) {
+                qs('#recent-payments-table').innerHTML = emptyState('💳', 'No payments yet');
+            } else {
+                let rows = '';
+                recent.forEach(p => {
+                    const name = p.profiles ? p.profiles.fname + ' ' + p.profiles.lname : '—';
+                    rows += `<tr><td>${p.receipt_no}</td><td>${name}</td><td class="text-green fw-bold">PKR ${fmt(p.amount)}</td><td>${p.payment_date}</td></tr>`;
+                });
+                qs('#recent-payments-table').innerHTML = `<table><thead><tr><th>Receipt</th><th>Student</th><th>Amount</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table>`;
+            }
+
+            // Pending dues / Fee status for all students
+            let dueHtml = '';
+            APP.assignments.forEach(a => {
+                const plan = a.fee_plans;
+                const student = a.profiles;
+                if (!plan || !student) return;
+                const paid = APP.payments.filter(p => p.assignment_id === a.id).reduce((s, p) => s + parseFloat(p.amount), 0);
+                const rem = parseFloat(plan.total) - paid;
+                const pct = Math.round((paid / parseFloat(plan.total)) * 100);
+                dueHtml += `<div style="padding:.8rem 1.5rem;border-bottom:1px solid var(--border);">
+        <div class="flex justify-between" style="margin-bottom:.4rem;font-size:.87rem;">
+          <span class="fw-bold">${student.fname} ${student.lname}</span>
+          <span class="text-${rem<=0?'green':'red'} fw-bold">PKR ${fmt(rem)}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill ${pct>70?'green':pct>30?'orange':'red'}" style="width:${pct}%"></div></div>
+        <div class="text-sm text-muted" style="margin-top:.3rem;">${pct}% paid of PKR ${fmt(plan.total)}</div>
+      </div>`;
+            });
+            qs('#pending-dues-list').innerHTML = dueHtml || emptyState('🎉', 'No fee assignments yet!');
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // STUDENT MANAGEMENT
+        // ═══════════════════════════════════════════════════════════
+        let _allStudentsCache = [];
+
+        function renderStudentManagement() {
+            _allStudentsCache = [...APP.students];
+            
+            // Update page header based on role
+            if (APP.profile.role === 'admin') {
+                qs('#view-student-management .page-header-title').textContent = 'Registered Students';
+                qs('#view-student-management .page-header-sub').textContent = 'View fee status of all registered students';
+                qs('#view-student-management .page-header-actions').innerHTML = '';
+            } else {
+                qs('#view-student-management .page-header-title').textContent = 'Student Management';
+                qs('#view-student-management .page-header-sub').textContent = 'Add, update or remove student accounts';
+                qs('#view-student-management .page-header-actions').innerHTML = '<button class="btn btn-primary" onclick="openModal(\'add-student-modal\')">+ Add Student</button>';
+            }
+            
+            renderStudentsTable(_allStudentsCache);
+            qs('#student-count-badge').textContent = APP.students.length;
+        }
+
+        function filterStudents(q) {
+            const f = q.toLowerCase();
+            renderStudentsTable(_allStudentsCache.filter(s =>
+                (s.fname + ' ' + s.lname).toLowerCase().includes(f) ||
+                (s.reg_no || '').toLowerCase().includes(f) ||
+                (s.email || '').toLowerCase().includes(f) ||
+                (s.course || '').toLowerCase().includes(f)
+            ));
+        }
+
+        function renderStudentsTable(students) {
+            let rows = '';
+            students.forEach(s => {
+                const asgn = APP.assignments.find(a => a.student_id === s.id);
+                let statusBadge = '<span class="badge badge-gray">No Plan</span>';
+                if (asgn) {
+                    const paid = APP.payments.filter(p => p.assignment_id === asgn.id).reduce((sum, p) => sum + parseFloat(p.amount), 0);
+                    const total = parseFloat((asgn.fee_plans && asgn.fee_plans.total) ? asgn.fee_plans.total : 0);
+                    const rem = total - paid;
+                    statusBadge = rem <= 0 ?
+                        '<span class="badge badge-green">✓ Paid</span>' :
+                        paid > 0 ?
+                        '<span class="badge badge-amber">Partial</span>' :
+                        '<span class="badge badge-red">Unpaid</span>';
+                }
+                
+                let actionsHtml = '';
+                if (APP.profile.role === 'accountant') {
+                    actionsHtml = `<span class="scholarship">${s.scholarship_percentage || 0}% <button class="btn btn-secondary btn-sm" onclick="setScholarship('${s.id}')">Set</button></span>
+      <span class="waiver">${s.waiver ? 'Yes' : 'No'} <button class="btn btn-secondary btn-sm" onclick="setWaiver('${s.id}')">Toggle</button></span>
+      <span class="fines">PKR ${fmt(s.total_fines || 0)}</span>
+      <span class="actions"><button class="btn btn-secondary btn-sm" onclick="openEditStudent('${s.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">🗑️</button></span>`;
+                } else {
+                    // Admin view-only
+                    actionsHtml = `<span class="scholarship" style="color: var(--text2);">${s.scholarship_percentage || 0}%</span>
+      <span class="waiver" style="color: var(--text2);">${s.waiver ? 'Yes' : 'No'}</span>
+      <span class="fines" style="color: var(--text2);">PKR ${fmt(s.total_fines || 0)}</span>`;
+                }
+                
+                rows += `<tr>
+      <td class="fw-bold">${s.reg_no}</td>
+      <td>${s.fname} ${s.lname}</td>
+      <td>${s.course||'—'}</td>
+      <td>${s.batch||'—'}</td>
+      <td>${s.email||'—'}</td>
+      <td>${statusBadge}</td>
+      <td>${actionsHtml}</td>
+    </tr>`;
+            });
+            qs('#students-table-body').innerHTML = rows || `<tr><td colspan="7" class="text-center text-muted" style="padding:2rem;">No users found</td></tr>`;
+        }
+
+        async function adminAddUser() {
+            const fname = v('as-fname').trim(),
+                lname = v('as-lname').trim();
+            const email = v('as-email').trim().toLowerCase();
+            const role = v('as-role');
+            const phone = v('as-phone').trim(),
+                course = role === 'student' ? v('as-course').trim() : '',
+                batch = role === 'student' ? v('as-batch').trim() : '';
+            const pass = v('as-pass').trim();
+            if (!fname || !lname || !email || !pass) {
+                toast('Fill all required fields', 'error');
+                return;
+            }
+            setLoading('add-student-btn', true, 'Adding...');
+            try {
+                if (role === 'accountant') {
+                    await Profiles.adminCreateAccountant({ email, password: pass, fname, lname });
+                    toast(`Accountant ${fname} ${lname} added. They can now log in.`, 'success');
+                } else {
+                    await Auth.signUp({
+                        email,
+                        password: pass,
+                        fname,
+                        lname,
+                        phone,
+                        course,
+                        batch
+                    });
+                    toast(`Student ${fname} ${lname} added. They must confirm their email before logging in.`, 'success');
+                }
+                closeModal('add-student-modal');
+                await refreshData();
+                renderStudentManagement();
+            } catch (e) {
+                toast(e.message, 'error');
+            } finally {
+                setLoading('add-student-btn', false, 'Add User');
+            }
+        }
+
+        function openEditStudent(id) {
+            const s = APP.students.find(x => x.id === id);
+            if (!s) return;
+            sv('es-id', s.id);
+            sv('es-fname', s.fname);
+            sv('es-lname', s.lname);
+            sv('es-email', s.email);
+            sv('es-phone', s.phone || '');
+            sv('es-course', s.course || '');
+            sv('es-batch', s.batch || '');
+            openModal('edit-student-modal');
+        }
+
+        async function saveStudentEdit() {
+            const id = v('es-id');
+            setLoading('edit-student-save-btn', true, 'Saving...');
+            try {
+                await Profiles.update(id, {
+                    fname: v('es-fname').trim(),
+                    lname: v('es-lname').trim(),
+                    phone: v('es-phone').trim(),
+                    course: v('es-course').trim(),
+                    batch: v('es-batch').trim()
+                });
+                closeModal('edit-student-modal');
+                toast('Student updated', 'success');
+                await refreshData();
+                renderStudentManagement();
+            } catch (e) {
+                toast(e.message, 'error');
+            } finally {
+                setLoading('edit-student-save-btn', false, 'Save Changes');
+            }
+        }
+
+        async function deleteStudent(id) {
+            if (!confirm('Delete this student? This will also remove their fee assignments and payments.')) return;
+            try {
+                await Profiles.delete(id);
+                toast('Student deleted', 'success');
+                await refreshData();
+                renderStudentManagement();
+            } catch (e) {
+                toast(e.message, 'error');
+            }
+        }
+
+        async function setScholarship(id) {
+            const percentage = prompt('Enter scholarship percentage (0-100):', '0');
+            if (percentage === null) return;
+            const pct = parseFloat(percentage);
+            if (isNaN(pct) || pct < 0 || pct > 100) {
+                toast('Invalid percentage', 'error');
+                return;
+            }
+            try {
+                await Profiles.setScholarship(id, pct);
+                toast('Scholarship updated', 'success');
+                await refreshData();
+                renderStudentManagement();
+            } catch (e) {
+                toast(e.message, 'error');
+            }
+        }
+
+        async function setWaiver(id) {
+            const current = APP.students.find(s => s.id === id).waiver;
+            const newWaiver = !current;
+            try {
+                await Profiles.setWaiver(id, newWaiver);
+                toast('Waiver updated', 'success');
+                await refreshData();
+                renderStudentManagement();
+            } catch (e) {
+                toast(e.message, 'error');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // FEE PLANS
+        // ═══════════════════════════════════════════════════════════
+        function generateInstallmentFields() {
+            const total = parseFloat(v('fp-total')) || 0;
+            const count = parseInt(v('fp-installments')) || 1;
+            const base = Math.floor((total / count) * 100) / 100;
+            const last = Math.round((total - base * (count - 1)) * 100) / 100;
+            const today = new Date();
+            let html = '<div style="margin-bottom:.5rem;font-size:.8rem;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Installment Details</div>';
+            for (let i = 1; i <= count; i++) {
+                const amt = i === count ? last : base;
+                const due = new Date(today);
+                due.setMonth(due.getMonth() + i - 1);
+                const dueStr = due.toISOString().split('T')[0];
+                html += `<div class="form-row" style="margin-bottom:.5rem;">
+      <div class="form-group" style="margin-bottom:0;"><label>Installment ${i} Amount</label><input type="number" id="fi-amt-${i}" value="${amt}"/></div>
+      <div class="form-group" style="margin-bottom:0;"><label>Due Date</label><input type="date" id="fi-due-${i}" value="${dueStr}"/></div>
+    </div>`;
+            }
+            qs('#installment-fields').innerHTML = html;
+        }
+
+        async function createFeePlan() {
+            const name = v('fp-name').trim();
+            const total = parseFloat(v('fp-total'));
+            const count = parseInt(v('fp-installments'));
+            if (!name || !total || !count) {
+                toast('Fill all fields', 'error');
+                return;
+            }
+            const installments = [];
+            for (let i = 1; i <= count; i++) {
+                const el1 = document.getElementById('fi-amt-' + i);
+                const el2 = document.getElementById('fi-due-' + i);
+                const amt = parseFloat((el1 && el1.value) ? el1.value : 0);
+                const due = (el2 && el2.value) ? el2.value : '';
+                if (!amt || !due) {
+                    toast(`Fill installment ${i} details`, 'error');
+                    return;
+                }
+                installments.push({
+                    amount: amt,
+                    dueDate: due
+                });
+            }
+            setLoading('create-plan-btn', true, 'Creating...');
+            try {
+                await FeePlans.create({
+                    name,
+                    total,
+                    installmentCount: count,
+                    installments
+                });
+                closeModal('fee-plan-modal');
+                toast('Fee plan created', 'success');
+                await refreshData();
+                renderFeePlans();
+            } catch (e) {
+                toast(e.message, 'error');
+            } finally {
+                setLoading('create-plan-btn', false, 'Create Plan');
+            }
+        }
+
+        function renderFeePlans() {
+            if (!APP.plans.length) {
+                qs('#fee-plans-grid').innerHTML = `<div style="grid-column:1/-1;">${emptyState('📋','No fee plans yet','Create your first fee plan to get started')}</div>`;
+                return;
+            }
+            qs('#fee-plans-grid').innerHTML = APP.plans.map(p => {
+                        const used = APP.assignments.filter(a => a.plan_id === p.id).length;
+                        const insts = p.installments || [];
+                        return `<div class="plan-card">
+      <div class="plan-name">${p.name}</div>
+      <div class="plan-amount">PKR ${fmt(p.total)}</div>
+      <div class="text-sm text-muted" style="margin-bottom:1rem;">${p.installment_count} installment${p.installment_count>1?'s':''} · ${used} student${used!==1?'s':''} assigned</div>
+      ${insts.map(i=>`<div class="flex justify-between text-sm" style="padding:.3rem 0;border-bottom:1px solid var(--border);">
+        <span>Installment ${i.no}</span>
+        <span class="fw-bold">PKR ${fmt(i.amount)}</span>
+        <span class="text-muted">${i.due_date}</span>
+      </div>`).join('')}
+      <div style="margin-top:1rem;display:flex;gap:.5rem;">
+        <button class="btn btn-danger btn-sm" onclick="deleteFeePlan(${p.id})">🗑️ Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteFeePlan(id) {
+  const used = APP.assignments.filter(a => a.plan_id === id).length;
+  if (used > 0 && !confirm(`This plan is assigned to ${used} student(s). Delete anyway?`)) return;
+  try {
+    await FeePlans.delete(id);
+    toast('Fee plan deleted', 'success');
+    await refreshData(); renderFeePlans();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// FEE ASSIGNMENTS
+// ═══════════════════════════════════════════════════════════
+async function populateAssignModal() {
+  const unassigned = APP.students.filter(s => !APP.assignments.find(a => a.student_id === s.id));
+  qs('#af-student').innerHTML = '<option value="">-- Select Student --</option>' +
+    unassigned.map(s => `<option value="${s.id}">${s.fname} ${s.lname} (${s.reg_no})</option>`).join('');
+  qs('#af-plan').innerHTML = '<option value="">-- Select Fee Plan --</option>' +
+    APP.plans.map(p => `<option value="${p.id}">${p.name} — PKR ${fmt(p.total)}</option>`).join('');
+}
+
+function renderFeeAssignments() {
+  let rows = '';
+  APP.assignments.forEach(a => {
+    const plan = a.fee_plans;
+    const student = a.profiles;
+    if (!plan || !student) return;
+    const paid = APP.payments.filter(p => p.assignment_id === a.id).reduce((s, p) => s + parseFloat(p.amount), 0);
+    const rem = parseFloat(plan.total) - paid;
+    const pct = Math.round((paid / parseFloat(plan.total)) * 100);
+    rows += `<tr>
+      <td>${student.fname} ${student.lname}</td>
+      <td>${student.reg_no}</td>
+      <td>${plan.name}</td>
+      <td>PKR ${fmt(plan.total)}</td>
+      <td class="text-green">PKR ${fmt(paid)}</td>
+      <td class="${rem>0?'text-red':'text-green'}">PKR ${fmt(Math.max(0,rem))}</td>
+      <td style="min-width:120px;">
+        <div class="progress-bar" style="margin-bottom:.2rem;"><div class="progress-fill ${pct>=100?'green':pct>50?'orange':'red'}" style="width:${pct}%"></div></div>
+        <div class="text-sm text-muted">${pct}%</div>
+      </td>
+      <td><button class="btn btn-danger btn-sm" onclick="removeAssignment(${a.id})">🗑️</button></td>
+    </tr>`;
+  });
+  qs('#assignments-table-body').innerHTML = rows || `<tr><td colspan="8" class="text-center text-muted" style="padding:2rem;">No assignments yet</td></tr>`;
+}
+
+async function assignFeePlan() {
+  const studentId = v('af-student');
+  const planId = parseInt(v('af-plan'));
+  if (!studentId || !planId) { toast('Select both student and plan', 'error'); return; }
+  setLoading('assign-btn', true, 'Assigning...');
+  try {
+    const asgn = await FeeAssignments.create(studentId, planId);
+    const student = APP.students.find(s => s.id === studentId);
+    const plan = APP.plans.find(p => p.id === planId);
+    await Notifications.add(studentId, 'fee_assigned', `Fee plan "${plan?.name}" (PKR ${fmt(plan?.total)}) has been assigned to your account.`);
+    closeModal('assign-fee-modal');
+    toast('Fee plan assigned successfully', 'success');
+    await refreshData(); renderFeeAssignments();
+  } catch (e) {
+    toast(e.message, 'error');
+  } finally {
+    setLoading('assign-btn', false, 'Assign Plan');
+  }
+}
+
+async function removeAssignment(id) {
+  if (!confirm('Remove this fee assignment? Associated payments will also be deleted.')) return;
+  try {
+    await FeeAssignments.delete(id);
+    toast('Assignment removed', 'success');
+    await refreshData(); renderFeeAssignments();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// RECORD PAYMENT
+// ═══════════════════════════════════════════════════════════
+function renderRecordPayment() {
+  qs('#pay-student-select').innerHTML = '<option value="">-- Choose Student --</option>' +
+    APP.students.map(s => `<option value="${s.id}">${s.fname} ${s.lname} (${s.reg_no})</option>`).join('');
+  qs('#student-fee-info').style.display = 'none';
+  qs('#no-assignment-msg').style.display = 'none';
+  qs('#installment-details').style.display = 'none';
+  sv('pay-date', new Date().toISOString().split('T')[0]);
+}
+
+function loadStudentInstallments() {
+  const sid = v('pay-student-select');
+  if (!sid) { qs('#student-fee-info').style.display='none'; return; }
+  const asgn = APP.assignments.find(a => a.student_id === sid);
+  if (!asgn) {
+    qs('#student-fee-info').style.display = 'none';
+    qs('#no-assignment-msg').style.display = 'block'; return;
+  }
+  qs('#no-assignment-msg').style.display = 'none';
+  const plan = asgn.fee_plans;
+  const instPmts = APP.payments.filter(p => p.assignment_id === asgn.id);
+  let opts = '<option value="">-- Choose Installment --</option>';
+  (plan.installments || []).forEach(i => {
+    const ip = Payments.sumForInstallment(instPmts, asgn.id, i.no);
+    const status = ip >= parseFloat(i.amount) ? '✓ Paid' : ip > 0 ? 'Partial' : 'Unpaid';
+    opts += `<option value="${i.no}">Installment ${i.no} — PKR ${fmt(i.amount)} (${status})</option>`;
+  });
+  qs('#pay-installment-select').innerHTML = opts;
+  qs('#student-fee-info').style.display = 'block';
+  qs('#installment-details').style.display = 'none';
+}
+
+function loadInstallmentAmount() {
+  const sid = v('pay-student-select');
+  const no = parseInt(v('pay-installment-select'));
+  if (!sid || !no) { qs('#installment-details').style.display='none'; return; }
+  const asgn = APP.assignments.find(a => a.student_id === sid);
+  const plan = asgn.fee_plans;
+  const inst = (plan.installments||[]).find(i => i.no === no);
+  const instPmts = APP.payments.filter(p => p.assignment_id === asgn.id);
+  const paid = Payments.sumForInstallment(instPmts, asgn.id, no);
+  const rem = Math.max(0, parseFloat(inst.amount) - paid);
+  qs('#inst-amount-display').textContent = `PKR ${fmt(inst.amount)} (Remaining: PKR ${fmt(rem)})`;
+  qs('#inst-due-display').textContent = inst.due_date;
+  qs('#inst-status-display').innerHTML = paid >= parseFloat(inst.amount)
+    ? '<span class="badge badge-green">Paid</span>'
+    : paid > 0 ? '<span class="badge badge-amber">Partial</span>' : '<span class="badge badge-red">Unpaid</span>';
+  sv('pay-amount', rem);
+  qs('#installment-details').style.display = 'block';
+}
+
+async function recordPayment() {
+  const sid = v('pay-student-select');
+  const no = parseInt(v('pay-installment-select'));
+  const amount = parseFloat(v('pay-amount'));
+  const date = v('pay-date');
+  const method = v('pay-method');
+  const notes = v('pay-notes');
+  if (!sid || !no || !amount || !date) { toast('Fill all required fields', 'error'); return; }
+  if (amount <= 0) { toast('Amount must be positive', 'error'); return; }
+  const asgn = APP.assignments.find(a => a.student_id === sid);
+  const plan = asgn.fee_plans;
+  const inst = (plan.installments||[]).find(i => i.no === no);
+  const instPmts = APP.payments.filter(p => p.assignment_id === asgn.id);
+  const existingPaid = Payments.sumForInstallment(instPmts, asgn.id, no);
+  if (existingPaid + amount > parseFloat(inst.amount)) {
+    toast(`Exceeds installment amount. Max remaining: PKR ${fmt(parseFloat(inst.amount)-existingPaid)}`, 'error'); return;
+  }
+  setLoading('pay-btn', true, 'Recording...');
+  try {
+    const payment = await Payments.create({
+      studentId: sid, assignmentId: asgn.id, planId: asgn.plan_id,
+      installmentNo: no, amount, paymentDate: date, method, notes
+    });
+    await Notifications.add(sid, 'payment_confirmed',
+      `Payment of PKR ${fmt(amount)} received for ${plan.name} - Installment ${no}. Receipt: ${payment.receipt_no}`);
+    const totalPaid = [...instPmts.map(p=>parseFloat(p.amount)), amount].reduce((a,b)=>a+b,0);
+    if (totalPaid >= parseFloat(plan.total)) {
+      await Notifications.add(sid, 'fully_paid',
+        `🎉 Congratulations! Your full fee of PKR ${fmt(plan.total)} for "${plan.name}" has been paid!`);
+    }
+    toast(`Payment recorded! Receipt: ${payment.receipt_no}`, 'success');
+    await refreshData();
+    showReceiptById(payment.id);
+    renderRecordPayment();
+  } catch (e) {
+    toast(e.message, 'error');
+  } finally {
+    setLoading('pay-btn', false, '💳 Record Payment');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// FEE TRACKING
+// ═══════════════════════════════════════════════════════════
+function renderFeeTracking() {
+  let total=0, paid=0, pending=0, partial=0, fully=0;
+  APP.assignments.forEach(a => {
+    const planTotal = parseFloat(a.fee_plans?.total || 0);
+    total += planTotal;
+    const p = Payments.sumForAssignment(APP.payments, a.id);
+    paid += p;
+    const rem = planTotal - p;
+    if (rem <= 0) fully++;
+    else if (p > 0) partial++;
+    else pending++;
+  });
+  qs('#tracking-stats').innerHTML =
+    statCard('💰','Total Fee',`PKR ${fmt(total)}`,'','blue') +
+    statCard('✅','Collected',`PKR ${fmt(paid)}`,'','green') +
+    statCard('⏳','Outstanding',`PKR ${fmt(Math.max(0,total-paid))}`,'','red') +
+    statCard('🎓','Fully Paid',`${fully} students`,'','green');
+  APP.trackFilter = 'all';
+  renderTrackingTable();
+}
+
+function filterTracking(f) {
+  APP.trackFilter = f;
+  ['all','pending','partial','paid'].forEach(x => {
+    const btn = qs('#track-'+x+'-btn');
+    if (!btn) return;
+    btn.className = btn.className.replace('btn-primary','btn-secondary');
+  });
+  const ab = qs('#track-'+f+'-btn');
+  if (ab) ab.className = ab.className.replace('btn-secondary','btn-primary');
+  renderTrackingTable();
+}
+
+function renderTrackingTable() {
+  let rows = '';
+  APP.assignments.forEach(a => {
+    const s = a.profiles, plan = a.fee_plans;
+    if (!s || !plan) return;
+    const paid = Payments.sumForAssignment(APP.payments, a.id);
+    const rem = parseFloat(plan.total) - paid;
+    const pct = Math.round((paid / parseFloat(plan.total)) * 100);
+    let status, badge;
+    if (rem <= 0) { status='paid'; badge='<span class="badge badge-green">✓ Paid</span>'; }
+    else if (paid > 0) { status='partial'; badge='<span class="badge badge-amber">Partial</span>'; }
+    else { status='pending'; badge='<span class="badge badge-red">Unpaid</span>'; }
+    if (APP.trackFilter !== 'all' && APP.trackFilter !== status) return;
+    const insts = plan.installments || [];
+    const nextInst = insts.find(i => Payments.sumForInstallment(APP.payments, a.id, i.no) < parseFloat(i.amount));
+    rows += `<tr>
+      <td>${s.fname} ${s.lname}<div class="text-sm text-muted">${s.reg_no}</div></td>
+      <td>${plan.name}</td>
+      <td>PKR ${fmt(plan.total)}</td>
+      <td class="text-green">PKR ${fmt(paid)}</td>
+      <td class="${rem>0?'text-red':'text-green'}">PKR ${fmt(Math.max(0,rem))}</td>
+      <td>${nextInst ? nextInst.due_date : '—'}</td>
+      <td>${badge}</td>
+    </tr>`;
+  });
+  qs('#tracking-table-body').innerHTML = rows || `<tr><td colspan="7" class="text-center text-muted" style="padding:2rem;">No records</td></tr>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RECEIPTS & HISTORY
+// ═══════════════════════════════════════════════════════════
+function renderAllReceipts() {
+  let rows = '';
+  APP.payments.forEach(p => {
+    const name = p.profiles ? p.profiles.fname + ' ' + p.profiles.lname : '—';
+    rows += `<tr>
+      <td class="fw-bold">${p.receipt_no}</td>
+      <td>${name}</td>
+      <td>Installment ${p.installment_no}</td>
+      <td class="text-green fw-bold">PKR ${fmt(p.amount)}</td>
+      <td>${p.method}</td>
+      <td>${p.payment_date}</td>
+      <td><button class="btn btn-secondary btn-sm" onclick="showReceiptById(${p.id})">🖨️ View</button></td>
+    </tr>`;
+  });
+  qs('#all-receipts-body').innerHTML = rows || `<tr><td colspan="7" class="text-center text-muted" style="padding:2rem;">No receipts</td></tr>`;
+}
+
+let _historyAll = [];
+function renderAllHistory() {
+  _historyAll = [...APP.payments];
+  renderHistoryTable(_historyAll);
+}
+
+function filterHistory(q) {
+  const f = q.toLowerCase();
+  renderHistoryTable(_historyAll.filter(p => {
+    const name = p.profiles ? p.profiles.fname+' '+p.profiles.lname : '';
+    return name.toLowerCase().includes(f) || p.receipt_no.toLowerCase().includes(f);
+  }));
+}
+
+function renderHistoryTable(payments) {
+  let rows = '';
+  payments.forEach(p => {
+    const name = p.profiles ? p.profiles.fname + ' ' + p.profiles.lname : '—';
+    const planName = p.fee_plans?.name || '—';
+    rows += `<tr>
+      <td class="fw-bold">${p.receipt_no}</td>
+      <td>${p.payment_date}</td>
+      <td>${name}</td>
+      <td>${planName}</td>
+      <td>Installment ${p.installment_no}</td>
+      <td class="text-green fw-bold">PKR ${fmt(p.amount)}</td>
+      <td>${p.method}</td>
+      <td><button class="btn btn-secondary btn-sm" onclick="showReceiptById(${p.id})">🖨️ View</button></td>
+    </tr>`;
+  });
+  qs('#history-table-body').innerHTML = rows || `<tr><td colspan="8" class="text-center text-muted" style="padding:2rem;">No records</td></tr>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RECEIPT MODAL
+// ═══════════════════════════════════════════════════════════
+async function showReceiptById(paymentId) {
+  try {
+    const p = await Payments.getById(paymentId);
+    showReceiptModal(p);
+  } catch (e) {
+    toast('Could not load receipt', 'error');
+  }
+}
+
+function showReceiptModal(p) {
+  const student = p.profiles;
+  const plan = p.fee_plans;
+  const insts = plan?.installments || [];
+  const inst = insts.find(i => i.no === p.installment_no);
+  // calc total paid for assignment
+  const allPmts = APP.payments.filter(x => x.assignment_id === (p.fee_assignments?.id || p.assignment_id));
+  const allPaid = allPmts.reduce((s, x) => s + parseFloat(x.amount), 0);
+  const totalFee = parseFloat(plan?.total || 0);
+
+  qs('#receipt-content').innerHTML = `
+    <div class="receipt" id="printable-receipt">
+      <div class="receipt-header">
+        <div class="receipt-logo">Edu<span>Fee</span></div>
+        <div class="receipt-subtitle">Fee Management System</div>
+        <div style="font-size:.75rem;color:var(--text3);margin-top:.3rem;">Generated: ${new Date().toLocaleString()}</div>
+      </div>
+      <div class="receipt-title">FEE PAYMENT RECEIPT</div>
+      <div class="receipt-row"><span class="receipt-row-label">Receipt Number</span><span class="receipt-row-value">${p.receipt_no}</span></div>
+      <div class="receipt-row"><span class="receipt-row-label">Student Name</span><span class="receipt-row-value">${student ? student.fname+' '+student.lname : '—'}</span></div>
+      <div class="receipt-row"><span class="receipt-row-label">Registration No.</span><span class="receipt-row-value">${student?.reg_no||'—'}</span></div>
+      <div class="receipt-row"><span class="receipt-row-label">Course</span><span class="receipt-row-value">${student?.course||'—'}</span></div>
+      <div class="receipt-row"><span class="receipt-row-label">Fee Plan</span><span class="receipt-row-value">${plan?.name||'—'}</span></div>
+      <div class="receipt-row"><span class="receipt-row-label">Installment No.</span><span class="receipt-row-value">${p.installment_no} of ${plan?.installment_count||'—'}</span></div>
+      <div class="receipt-row"><span class="receipt-row-label">Due Date</span><span class="receipt-row-value">${inst?.due_date||'—'}</span></div>
+      <div class="receipt-row"><span class="receipt-row-label">Payment Date</span><span class="receipt-row-value">${p.payment_date}</span></div>
+      <div class="receipt-row"><span class="receipt-row-label">Payment Method</span><span class="receipt-row-value">${p.method}</span></div>
+      ${p.notes ? `<div class="receipt-row"><span class="receipt-row-label">Notes</span><span class="receipt-row-value">${p.notes}</span></div>` : ''}
+      <div class="receipt-total">
+        <span>Amount Paid</span>
+        <span style="font-family:var(--font-display);font-size:1.5rem;">PKR ${fmt(p.amount)}</span>
+      </div>
+      <div class="receipt-row" style="margin-top:.5rem;"><span class="receipt-row-label">Total Fee</span><span class="receipt-row-value">PKR ${fmt(totalFee)}</span></div>
+      <div class="receipt-row"><span class="receipt-row-label">Total Paid to Date</span><span class="receipt-row-value text-green">PKR ${fmt(allPaid)}</span></div>
+      <div class="receipt-row"><span class="receipt-row-label">Remaining Balance</span><span class="receipt-row-value ${totalFee-allPaid>0?'text-red':'text-green'}">PKR ${fmt(Math.max(0,totalFee-allPaid))}</span></div>
+      <div class="receipt-footer">
+        <div class="receipt-stamp">PAID</div>
+        <div style="margin-top:.8rem;">This is a computer-generated receipt and is valid without signature.</div>
+        <div>EduFee — Fee Management System · admin@edufee.com</div>
+      </div>
+    </div>`;
+  openModal('receipt-modal');
+}
+
+function printReceipt() {
+  const content = qs('#printable-receipt').outerHTML;
+  const w = window.open('', '_blank', 'width=700,height=900');
+  w.document.write(`<html><head><title>Fee Receipt</title><style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Plus Jakarta Sans',sans-serif;padding:2rem;background:#fff;}
+    :root{--navy:#0f2b4a;--accent2:#f59e0b;--green:#10b981;--red:#ef4444;--text:#0f172a;--text2:#475569;--text3:#94a3b8;--border:#e2e8f0;}
+    .receipt{border:2px solid #e2e8f0;border-radius:10px;padding:2rem;max-width:580px;margin:0 auto;}
+    .receipt-header{text-align:center;border-bottom:2px dashed #e2e8f0;padding-bottom:1.5rem;margin-bottom:1.5rem;}
+    .receipt-logo{font-size:1.8rem;font-weight:700;color:#0f2b4a;}
+    .receipt-logo span{color:#f59e0b;}
+    .receipt-subtitle{color:#475569;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;}
+    .receipt-title{background:#0f2b4a;color:#fff;text-align:center;padding:.6rem;font-weight:700;font-size:.85rem;letter-spacing:.1em;margin-bottom:1.5rem;border-radius:4px;}
+    .receipt-row{display:flex;justify-content:space-between;padding:.5rem 0;font-size:.88rem;border-bottom:1px solid #f1f5f9;}
+    .receipt-row-label{color:#475569;}
+    .receipt-row-value{font-weight:600;}
+    .receipt-total{background:#0f2b4a;color:#fff;padding:1rem;border-radius:6px;display:flex;justify-content:space-between;align-items:center;margin-top:1rem;}
+    .receipt-footer{text-align:center;margin-top:1.5rem;color:#94a3b8;font-size:.75rem;border-top:1px dashed #e2e8f0;padding-top:1rem;}
+    .receipt-stamp{display:inline-block;border:3px solid #10b981;color:#10b981;font-weight:700;padding:.4rem 1.2rem;border-radius:4px;transform:rotate(-5deg);font-size:1.1rem;letter-spacing:.1em;margin-top:1rem;}
+    .text-green{color:#10b981;} .text-red{color:#ef4444;}
+  </style></head><body>${content}</body></html>`);
+  w.document.close();
+  setTimeout(() => w.print(), 500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════
+function updateNotifBadge() {
+  const count = APP.notifications.filter(n => !n.is_read).length;
+  const dot = qs('#notif-dot');
+  const badge = qs('#notif-badge');
+  const badgeAdmin = qs('#notif-badge-admin');
+  const badgeS = qs('#notif-badge-s');
+  if (dot) { dot.classList.toggle('hidden', count === 0); }
+  if (badge) { badge.classList.toggle('hidden', count === 0); if(count) badge.textContent = count; }
+  if (badgeAdmin) { badgeAdmin.classList.toggle('hidden', count === 0); if(count) badgeAdmin.textContent = count; }
+  if (badgeS) { badgeS.classList.toggle('hidden', count === 0); if(count) badgeS.textContent = count; }
+}
+
+async function markAllRead() {
+  try {
+    await Notifications.markAllRead(APP.profile.id, APP.profile.role);
+    APP.notifications = APP.notifications.map(n => ({...n, is_read: true}));
+    updateNotifBadge();
+    renderNotifications();
+    toast('All notifications marked as read', 'success');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function renderNotifications() {
+  const icons = { welcome:'🎉', fee_assigned:'📋', payment_confirmed:'✅', fully_paid:'🏆', fee_due:'⚠️' };
+  const colors = { welcome:'#eff6ff', fee_assigned:'#f0fdf4', payment_confirmed:'#f0fdf4', fully_paid:'#fffbeb', fee_due:'#fff7ed' };
+  let html = '';
+  APP.notifications.forEach(n => {
+    html += `<div class="notif-item ${n.is_read?'':'unread'}" onclick="markOneRead(${n.id})">
+      <div class="notif-icon" style="background:${colors[n.type]||'#f1f5f9'}">${icons[n.type]||'🔔'}</div>
+      <div class="notif-body">
+        <div class="notif-msg">${n.message}</div>
+        <div class="notif-time">${new Date(n.created_at).toLocaleString()}</div>
+      </div>
+      ${!n.is_read ? '<div style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:.3rem;"></div>' : ''}
+    </div>`;
+  });
+  qs('#notifications-list').innerHTML = html || emptyState('🔔','No notifications');
+}
+
+async function markOneRead(id) {
+  try {
+    await Notifications.markRead(id);
+    const idx = APP.notifications.findIndex(n => n.id === id);
+    if (idx >= 0) APP.notifications[idx].is_read = true;
+    updateNotifBadge();
+    renderNotifications();
+  } catch (e) { /* ignore */ }
+}
+
+// ═══════════════════════════════════════════════════════════
+// STUDENT VIEWS
+// ═══════════════════════════════════════════════════════════
+function renderStudentDashboard() {
+  const cu = APP.profile;
+  qs('#student-welcome-sub').textContent = `Welcome back, ${cu.fname}! Here's your fee overview.`;
+  if (!APP.assignments || APP.assignments.length === 0) {
+    qs('#student-stats').innerHTML = statCard('📋','Fee Status','No Plan Assigned','','gray');
+    qs('#my-installments-list').innerHTML = emptyState('📋','No fee plan assigned yet');
+    qs('#my-recent-payments').innerHTML = emptyState('💳','No payments yet');
+    return;
+  }
+
+  // Calculate total across all assignments
+  let totalFee = 0;
+  let totalPaid = 0;
+  APP.assignments.forEach(asgn => {
+    if (asgn.fee_plans) {
+      let planTotal = parseFloat(asgn.fee_plans.total);
+      // Apply scholarship
+      if (cu.scholarship_percentage) {
+        planTotal *= (1 - cu.scholarship_percentage / 100);
+      }
+      // Apply waiver
+      if (cu.waiver) {
+        planTotal = 0;
+      }
+      totalFee += planTotal;
+      totalPaid += Payments.sumForAssignment(APP.payments, asgn.id);
+    }
+  });
+  const rem = totalFee - totalPaid;
+  const pct = totalFee > 0 ? Math.round((totalPaid / totalFee) * 100) : 0;
+  qs('#student-stats').innerHTML =
+    statCard('💰','Total Fee','PKR '+fmt(totalFee),'','blue') +
+    statCard('✅','Paid','PKR '+fmt(totalPaid),'','green') +
+    statCard('⏳','Remaining','PKR '+fmt(Math.max(0,rem)),'','red') +
+    statCard('📊','Progress',pct+'%','','amber');
+
+  let instHtml = '';
+  APP.assignments.forEach(asgn => {
+    if (!asgn.fee_plans) return;
+    const plan = asgn.fee_plans;
+    instHtml += `<div style="margin-bottom:1rem;"><h4>${plan.name} ${asgn.semester ? '(' + asgn.semester + ')' : ''}</h4>`;
+    (plan.installments||[]).forEach(i => {
+      const ip = Payments.sumForInstallment(APP.payments, asgn.id, i.no);
+      const rem2 = Math.max(0, parseFloat(i.amount) - ip);
+      const st = ip >= parseFloat(i.amount) ? 'paid' : ip > 0 ? 'partial' : 'pending';
+      const badges = { paid:'<span class="badge badge-green">✓ Paid</span>', partial:'<span class="badge badge-amber">Partial</span>', pending:'<span class="badge badge-red">Pending</span>' };
+      instHtml += `<div style="padding:.9rem 1.5rem;border-bottom:1px solid var(--border);margin-left:1rem;">
+        <div class="flex justify-between items-center">
+          <div><div class="fw-bold" style="font-size:.9rem;">Installment ${i.no}</div><div class="text-sm text-muted">Due: ${i.due_date} · PKR ${fmt(i.amount)}</div></div>
+          ${badges[st]}
+        </div>
+        ${st!=='paid'?`<div class="text-sm text-red" style="margin-top:.3rem;">Remaining: PKR ${fmt(rem2)}</div>`:''}
+      </div>`;
+    });
+    instHtml += '</div>';
+  });
+  qs('#my-installments-list').innerHTML = instHtml;
+
+  const recent = [...APP.payments].slice(0, 3);
+  qs('#my-recent-payments').innerHTML = recent.length
+    ? recent.map(p => `<div style="padding:.9rem 1.5rem;border-bottom:1px solid var(--border);">
+        <div class="flex justify-between items-center">
+          <div><div class="fw-bold" style="font-size:.87rem;">${p.receipt_no}</div><div class="text-sm text-muted">Installment ${p.installment_no} · ${p.payment_date}</div></div>
+          <div class="text-green fw-bold">PKR ${fmt(p.amount)}</div>
+        </div>
+      </div>`).join('')
+    : emptyState('💳','No payments yet');
+}
+
+function renderMyProfile() {
+  const cu = APP.profile;
+  qs('#profile-content').innerHTML = `
+    <div class="profile-header">
+      <div class="profile-avatar-lg">${cu.fname[0].toUpperCase()}</div>
+      <div>
+        <div class="profile-name">${cu.fname} ${cu.lname}</div>
+        <div class="profile-role">Student</div>
+        <div class="profile-reg">${cu.reg_no}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Personal Information</div></div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div><div class="text-sm text-muted">Full Name</div><div class="fw-bold">${cu.fname} ${cu.lname}</div></div>
+          <div><div class="text-sm text-muted">Phone</div><div class="fw-bold">${cu.phone||'Not set'}</div></div>
+          <div><div class="text-sm text-muted">Registration No.</div><div class="fw-bold">${cu.reg_no}</div></div>
+          <div><div class="text-sm text-muted">Course</div><div class="fw-bold">${cu.course||'Not set'}</div></div>
+          <div><div class="text-sm text-muted">Batch</div><div class="fw-bold">${cu.batch||'Not set'}</div></div>
+          <div><div class="text-sm text-muted">Address</div><div class="fw-bold">${cu.address||'Not set'}</div></div>
+        </div>
+      </div>
+    </div>`;
+  sv('ep-fname', cu.fname); sv('ep-lname', cu.lname);
+  sv('ep-course', cu.course||''); sv('ep-batch', cu.batch||'');
+  sv('ep-phone', cu.phone||''); sv('ep-address', cu.address||'');
+}
+
+async function saveProfile() {
+  setLoading('save-profile-btn', true, 'Saving...');
+  try {
+    const updates = {
+      fname: v('ep-fname').trim() || APP.profile.fname,
+      lname: v('ep-lname').trim() || APP.profile.lname,
+      course: v('ep-course').trim(),
+      batch: v('ep-batch').trim(),
+      phone: v('ep-phone').trim(),
+      address: v('ep-address').trim(),
+    };
+    const updated = await Profiles.update(APP.profile.id, updates);
+    APP.profile = { ...APP.profile, ...updated };
+    qs('#sb-name').textContent = APP.profile.fname + ' ' + APP.profile.lname;
+    qs('#sb-avatar').textContent = APP.profile.fname[0];
+    qs('#topbar-avatar').textContent = APP.profile.fname[0];
+    const newPass = v('ep-pass');
+    if (newPass && newPass.length >= 6) {
+      // Password update via Supabase auth
+      await _sb.auth.updateUser({ password: newPass });
+    }
+    closeModal('edit-profile-modal');
+    toast('Profile updated', 'success');
+    renderMyProfile();
+  } catch (e) {
+    toast(e.message, 'error');
+  } finally {
+    setLoading('save-profile-btn', false, 'Save Changes');
+  }
+}
+
+function renderMyFees() {
+  const asgn = APP.assignments[0];
+  if (!asgn || !asgn.fee_plans) {
+    qs('#my-fees-content').innerHTML = emptyState('📋','No fee plan assigned','Contact admin to assign a fee plan to your account');
+    return;
+  }
+  const plan = asgn.fee_plans;
+  const paid = Payments.sumForAssignment(APP.payments, asgn.id);
+  const rem = parseFloat(plan.total) - paid;
+  const pct = Math.round((paid / parseFloat(plan.total)) * 100);
+  let instRows = '';
+  (plan.installments||[]).forEach(i => {
+    const ip = Payments.sumForInstallment(APP.payments, asgn.id, i.no);
+    const st = ip >= parseFloat(i.amount)
+      ? '<span class="badge badge-green">✓ Paid</span>'
+      : ip > 0 ? '<span class="badge badge-amber">Partial</span>' : '<span class="badge badge-red">Pending</span>';
+    instRows += `<tr>
+      <td>Installment ${i.no}</td>
+      <td>PKR ${fmt(i.amount)}</td>
+      <td>${i.due_date}</td>
+      <td class="text-green">PKR ${fmt(ip)}</td>
+      <td class="${ip<parseFloat(i.amount)?'text-red':'text-green'}">PKR ${fmt(Math.max(0,parseFloat(i.amount)-ip))}</td>
+      <td>${st}</td>
+      <td>${ip < parseFloat(i.amount) ? `<button class="btn btn-primary btn-sm" onclick="showView('student-pay-fee');setTimeout(() => { sv('sp-installment-select', ${i.no}); loadStudentPayAmount(); }, 100)">Pay</button>` : '—'}</td>
+    </tr>`;
+  });
+  qs('#my-fees-content').innerHTML = `
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-header"><div class="card-title">📋 ${plan.name}</div></div>
+      <div class="card-body">
+        <div class="grid-2 mb-3">
+          <div><div class="text-sm text-muted">Total Fee</div><div style="font-family:var(--font-display);font-size:1.5rem;color:var(--accent);">PKR ${fmt(plan.total)}</div></div>
+          <div><div class="text-sm text-muted">Installments</div><div style="font-size:1.2rem;font-weight:700;">${plan.installment_count}</div></div>
+        </div>
+        <div class="progress-bar" style="height:12px;margin-bottom:.5rem;"><div class="progress-fill ${pct>=100?'green':pct>50?'orange':'red'}" style="width:${pct}%"></div></div>
+        <div class="flex justify-between text-sm">
+          <span class="text-green">Paid: PKR ${fmt(paid)}</span>
+          <span class="fw-bold">${pct}% Complete</span>
+          <span class="text-red">Remaining: PKR ${fmt(Math.max(0,rem))}</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">💳 Installment Schedule</div></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Installment</th><th>Amount</th><th>Due Date</th><th>Paid</th><th>Remaining</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>${instRows}</tbody>
+      </table></div>
+    </div>`;
+}
+
+function renderMyDues() {
+  const asgn = APP.assignments[0];
+  if (!asgn || !asgn.fee_plans) {
+    qs('#my-dues-content').innerHTML = emptyState('✅','No pending dues');
+    return;
+  }
+  const plan = asgn.fee_plans;
+  let html = '', hasDues = false;
+  (plan.installments||[]).forEach(i => {
+    const ip = Payments.sumForInstallment(APP.payments, asgn.id, i.no);
+    if (ip < parseFloat(i.amount)) {
+      hasDues = true;
+      const rem = parseFloat(i.amount) - ip;
+      const isOverdue = new Date(i.due_date) < new Date();
+      html += `<div class="card" style="margin-bottom:1rem;">
+        <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+          <div>
+            <div class="fw-bold">Installment ${i.no} of ${plan.installment_count}</div>
+            <div class="text-sm text-muted">${plan.name}</div>
+            <div class="text-sm ${isOverdue?'text-red':'text-muted'}" style="margin-top:.2rem;">${isOverdue?'⚠️ Overdue — ':'📅 '}Due: ${i.due_date}</div>
+            ${ip>0?`<div class="text-sm text-green" style="margin-top:.2rem;">Partially paid: PKR ${fmt(ip)}</div>`:''}
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:var(--font-display);font-size:1.6rem;color:var(--red);">PKR ${fmt(rem)}</div>
+            <div class="text-sm text-muted">remaining</div>
+            <button class="btn btn-primary btn-sm mt-2" onclick="showView('student-pay-fee');setTimeout(() => { sv('sp-installment-select', ${i.no}); loadStudentPayAmount(); }, 100)">Pay Now</button>
+          </div>
+        </div>
+      </div>`;
+    }
+  });
+  qs('#my-dues-content').innerHTML = hasDues ? html : emptyState('🎉','No pending dues!','All your installments are fully paid.');
+}
+
+function renderMyPayments() {
+  let rows = '';
+  APP.payments.forEach(p => {
+    rows += `<tr>
+      <td class="fw-bold">${p.receipt_no}</td>
+      <td>${p.payment_date}</td>
+      <td>Installment ${p.installment_no}</td>
+      <td class="text-green fw-bold">PKR ${fmt(p.amount)}</td>
+      <td>${p.method}</td>
+      <td><button class="btn btn-secondary btn-sm" onclick="showReceiptById(${p.id})">🖨️</button></td>
+    </tr>`;
+  });
+  qs('#my-payments-body').innerHTML = rows || `<tr><td colspan="6" class="text-center text-muted" style="padding:2rem;">No payments yet</td></tr>`;
+}
+
+function renderMyReceipts() {
+  let rows = '';
+  APP.payments.forEach(p => {
+    rows += `<tr>
+      <td class="fw-bold">${p.receipt_no}</td>
+      <td>Installment ${p.installment_no}</td>
+      <td class="text-green fw-bold">PKR ${fmt(p.amount)}</td>
+      <td>${p.payment_date}</td>
+      <td class="actions-cell">
+        <button class="btn btn-secondary btn-sm" onclick="showReceiptById(${p.id})">👁️ View</button>
+        <button class="btn btn-primary btn-sm" onclick="showReceiptById(${p.id}).then(()=>setTimeout(printReceipt,200))">🖨️ Print</button>
+      </td>
+    </tr>`;
+  });
+  qs('#my-receipts-body').innerHTML = rows || `<tr><td colspan="5" class="text-center text-muted" style="padding:2rem;">No receipts yet</td></tr>`;
+}
+
+function renderStudentPayFee() {
+  const asgn = APP.assignments[0];
+  if (!asgn || !asgn.fee_plans) {
+    qs('#student-pay-no-asgn').style.display = 'block';
+    qs('#student-pay-form').style.display = 'none';
+    return;
+  }
+  qs('#student-pay-no-asgn').style.display = 'none';
+  qs('#student-pay-form').style.display = 'block';
+  sv('sp-date', new Date().toISOString().split('T')[0]);
+  
+  const plan = asgn.fee_plans;
+  let opts = '<option value="">-- Choose Installment --</option>';
+  (plan.installments || []).forEach(i => {
+    const ip = Payments.sumForInstallment(APP.payments, asgn.id, i.no);
+    const status = ip >= parseFloat(i.amount) ? '✓ Paid' : ip > 0 ? 'Partial' : 'Unpaid';
+    opts += `<option value="${i.no}">Installment ${i.no} — PKR ${fmt(i.amount)} (${status})</option>`;
+  });
+  qs('#sp-installment-select').innerHTML = opts;
+  qs('#sp-installment-details').style.display = 'none';
+}
+
+function loadStudentPayAmount() {
+  const no = parseInt(v('sp-installment-select'));
+  if (!no) { qs('#sp-installment-details').style.display = 'none'; return; }
+  const asgn = APP.assignments[0];
+  const plan = asgn.fee_plans;
+  const inst = (plan.installments||[]).find(i => i.no === no);
+  const paid = Payments.sumForInstallment(APP.payments, asgn.id, no);
+  const rem = Math.max(0, parseFloat(inst.amount) - paid);
+  
+  qs('#sp-amount-display').textContent = `PKR ${fmt(inst.amount)} (Remaining: PKR ${fmt(rem)})`;
+  qs('#sp-due-display').textContent = inst.due_date;
+  qs('#sp-status-display').innerHTML = paid >= parseFloat(inst.amount)
+    ? '<span class="badge badge-green">Paid</span>'
+    : paid > 0 ? '<span class="badge badge-amber">Partial</span>' : '<span class="badge badge-red">Unpaid</span>';
+  sv('sp-amount', rem);
+  qs('#sp-installment-details').style.display = 'block';
+}
+
+async function studentProcessPayment() {
+  const no = parseInt(v('sp-installment-select'));
+  const amount = parseFloat(v('sp-amount'));
+  const date = v('sp-date');
+  const method = v('sp-method');
+  const notes = v('sp-notes');
+  if (!no || !amount || !date) { toast('Please select installment and amount', 'error'); return; }
+  if (amount <= 0) { toast('Amount must be positive', 'error'); return; }
+  
+  const asgn = APP.assignments[0];
+  const plan = asgn.fee_plans;
+  const inst = (plan.installments||[]).find(i => i.no === no);
+  const existingPaid = Payments.sumForInstallment(APP.payments, asgn.id, no);
+  if (existingPaid + amount > parseFloat(inst.amount)) {
+    toast(`Exceeds installment amount. Max remaining: PKR ${fmt(parseFloat(inst.amount)-existingPaid)}`, 'error'); return;
+  }
+  
+  setLoading('sp-btn', true, 'Processing...');
+  try {
+    const payment = await Payments.create({
+      studentId: APP.profile.id,
+      assignmentId: asgn.id,
+      planId: asgn.plan_id,
+      installmentNo: no,
+      amount,
+      paymentDate: date,
+      method,
+      notes: notes + ' (Self-paid from student portal)'
+    });
+    
+    await Notifications.add(APP.profile.id, 'payment_confirmed', `Real-time Confirmation: Your payment of PKR ${fmt(amount)} for Installment ${no} (${plan.name}) was successful. Receipt: ${payment.receipt_no}`);
+    
+    toast(`Payment successful! Receipt: ${payment.receipt_no}`, 'success');
+    await refreshData();
+    showReceiptById(payment.id);
+    showView('my-payments');
+  } catch (e) {
+    toast(e.message, 'error');
+  } finally {
+    setLoading('sp-btn', false, '💳 Pay Now');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════════
+function openModal(id) {
+  if (id === 'assign-fee-modal') populateAssignModal();
+  if (id === 'fee-plan-modal') { qs('#installment-fields').innerHTML=''; generateInstallmentFields(); }
+  qs('#'+id).classList.add('open');
+}
+function closeModal(id) { qs('#'+id).classList.remove('open'); }
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay')) e.target.classList.remove('open');
+});
+
+// ═══════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════
+function toast(msg, type='info') {
+  const icons = { success:'✅', error:'❌', info:'ℹ️', warning:'⚠️' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span class="toast-icon">${icons[type]||'🔔'}</span>${msg}`;
+  qs('#toast-container').appendChild(t);
+  setTimeout(() => t.style.opacity='0', 3200);
+  setTimeout(() => t.remove(), 3600);
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function qs(sel) { return document.querySelector(sel); }
+function v(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+function sv(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
+function fmt(n) { return Number(n||0).toLocaleString('en-PK'); }
+
+function statCard(icon, label, value, change, color) {
+  return `<div class="stat-card">
+    <div class="stat-icon ${color}">${icon}</div>
+    <div>
+      <div class="stat-value">${value}</div>
+      <div class="stat-label">${label}</div>
+      ${change ? `<div class="stat-change">${change}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function emptyState(icon, title, sub='') {
+  return `<div class="empty-state"><div class="empty-state-icon">${icon}</div><div class="empty-state-title">${title}</div>${sub?`<div class="empty-state-sub">${sub}</div>`:''}</div>`;
+}
+
+function setLoading(btnId, loading, label) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.textContent = loading ? '⏳ ' + label : label;
+}
+    </script>
+</body>
+
+</html>

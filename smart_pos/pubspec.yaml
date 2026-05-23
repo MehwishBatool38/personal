@@ -1,0 +1,47 @@
+name: smart_pos_app
+description: "Smart POS & Inventory Management App"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.10.4 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Firebase
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.15.0
+  cloud_firestore: ^4.15.0
+
+  # Database
+  sqflite: ^2.3.0
+  path: ^1.8.3
+
+  # UI & State Management
+  cupertino_icons: ^1.0.2
+  provider: ^6.1.1
+  google_sign_in: ^6.1.5
+
+  # Utilities
+  intl: ^0.18.1
+  shared_preferences: ^2.2.2
+  image_picker: ^1.0.4
+
+  # HTTP & Networking
+  http: ^1.1.0
+  connectivity_plus: ^5.0.2
+
+  # For UUID generation
+  uuid: ^4.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+

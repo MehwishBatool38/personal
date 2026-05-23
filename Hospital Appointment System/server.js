@@ -2,8 +2,10 @@
 //   MediBook - Hospital Appointment REST API
 //   Stack: Node.js + Express.js
 const express = require('express');
+const path = require('path');
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ──────────────────────────────────────────
 //  DUMMY DATA (In-Memory Database)
@@ -31,6 +33,10 @@ let appointments = [
 // ──────────────────────────────────────────
 
 app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/api', (req, res) => {
   res.json({
     message: "Welcome to MediBook Hospital API 🏥",
     endpoints: {

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediBook Hospital System</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>MediBook</h1>
+      <p>Hospital appointment manager</p>
+    </div>
+    <nav>
+      <button id="patientsBtn" class="active">Patients</button>
+      <button id="doctorsBtn">Doctors</button>
+      <button id="appointmentsBtn">Appointments</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="toolbar">
+      <div id="statusMessage" class="status"></div>
+    </section>
+
+    <section id="content" class="content"></section>
+  </main>
+
+  <footer>
+    <p>Built with Node.js and Express. Your data is stored in memory while the server runs.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

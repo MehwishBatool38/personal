@@ -4,20 +4,35 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Run Vite Dev Server",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "serverReadyAction": {
+        "pattern": "Local:\\s+(http://localhost:[0-9]+/)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      },
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Start React Production Server",
       "program": "${workspaceFolder}/server.js",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal"
     },
     {
-      "type": "chrome",
+      "type": "pwa-chrome",
       "request": "launch",
       "name": "Open React App on 3000",
       "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}/src"
     },
     {
-      "type": "chrome",
+      "type": "pwa-chrome",
       "request": "launch",
       "name": "Open Vite Dev App on 5173",
       "url": "http://localhost:5173",
